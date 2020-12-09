@@ -22,7 +22,6 @@ def search_1(data):
 def search_2(valid_passports):
     filtered_passports = []
     for passport in valid_passports:
-        valid_height(passport['hgt'])
         if (int(passport['byr']) not in range(1920, 2003)):
             continue
         if (int(passport['iyr']) not in range(2010, 2021)):
