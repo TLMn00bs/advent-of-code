@@ -18,6 +18,7 @@ def search_2(file):
     '''
         Using a property of the Tribonacci numbers, we can obtain all the combinations from the length
         of all the continuos sequences inside our list.
+        NOTE: This property is valid if the size of the gaps is 1 or 3
         Example: 
             If we have an order sequence as the input there are three continuous sequences:
                 [1, 2, 3, 6, 9, 10, 12, 13, 14, 15, 17, 18, 19, 21] -> [1, 2, 3], [9, 10], [12, 13, 14, 15] and [17, 18, 19]
@@ -63,6 +64,8 @@ print('\t a = num of continuous sequences of length 2')
 print('\t b = num of continuous sequences of length 3')
 print('\t c = num of continuous sequences of length 4')
 print('\t d = num of continuous sequences of length 5')
+print()
+print('NOTE: This property is valid if the size of the gaps is 1 or 3')
 print()
 print('More details in {LINK}'.format(LINK=link))
 print('\t or in the comments of the code.')
