@@ -65,6 +65,10 @@ echo "Created file day$day/formulation.txt"
 rm day$day/tmp.txt
 
 
+#Ensure we are in sync
+git fetch
+git pull
+
 #Push to git
 git add day$day/*
 git commit -m "Day$day"
