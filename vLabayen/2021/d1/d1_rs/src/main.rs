@@ -36,23 +36,16 @@ fn p2(filename: &String) {
 	let reader = BufReader::new(file);
 	let mut data_gen = reader.lines();
 
-	let first = data_gen.next();
-        
-	match first {
-		Some(depth) => sliding_window[0] = depth.unwrap().parse::<i32>().unwrap(),
-		None => process::exit(1)
-	}
-	let second = data_gen.next();
-	match second {
-		Some(depth) => sliding_window[1] = depth.unwrap().parse::<i32>().unwrap(),
-		None => process::exit(1)
-	}
-	let third = data_gen.next();
-	match third {
-		Some(depth) => sliding_window[2] = depth.unwrap().parse::<i32>().unwrap(),
-		None => process::exit(1)
+	// Read the first 3 items of the file to prefill the sliding window
+	for idx in 0..3 {
+		let item = data_gen.next();
+		match item {
+			Some(depth) => sliding_window[idx] = depth.unwrap().parse::<i32>().unwrap(),
+			None => process::exit(1)
+		}
 	}
 
+	// Read the remaining depths
 	for (_, line) in data_gen.enumerate() {
 		let past_sum:i32 = sliding_window.iter().sum();
 
@@ -70,8 +63,6 @@ fn p2(filename: &String) {
 
         }
         println!("Number of depth increments: {}", n);
-
-
 }
 
 fn main() {
