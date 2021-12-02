@@ -1,0 +1,4 @@
+while true in list-comprehension --> infinte generator
+	https://stackoverflow.com/questions/5737196/is-there-an-expression-for-an-infinite-iterator
+	https://stackoverflow.com/questions/9059173/what-is-the-purpose-in-pythons-itertools-repeat
+break in list comprehension --> https://stackoverflow.com/questions/9572833/using-break-in-a-list-comprehension#9572933

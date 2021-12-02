@@ -1,0 +1,2 @@
+with open('input.txt') as f: print(max(set(8 * int(''.join([str(1 * (rc=='B')) for rc in c[:7]]), 2) + int(''.join([str(1 * (cc=='R')) for cc in c[7:]]), 2) for c in (line[:-1] for line in f))))
+with open('input.txt') as f: print([v for dif in (set(range(max(used))).difference(used) for used in [set(8 * int(''.join([str(1 * (rc=='B')) for rc in c[:7]]), 2) + int(''.join([str(1 * (cc=='R')) for cc in c[7:]]), 2) for c in (line[:-1] for line in f))]) for v in dif if (v-1 not in dif) and (v+1 not in dif)][0])
