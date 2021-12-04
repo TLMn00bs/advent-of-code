@@ -4,44 +4,21 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use itertools::Itertools;
 
-
-//https://www.reddit.com/r/rust/comments/97e9rd/comment/e48s11x/?utm_source=share&utm_medium=web2x&context=3
-//https://stackoverflow.com/a/61948093
-//https://doc.rust-lang.org/std/result/
-enum Action { Forward, Down, Up }
-impl Action {
-	fn from_str(input: &str) -> Result<Action, &'static str> {
-		return match input {
-			"forward" => Ok(Action::Forward),
-			"down"    => Ok(Action::Down),
-			"up"      => Ok(Action::Up),
-			_         => Err("Unknown action"),
-		}
-	}
-	fn exec_p1(&self, h:i32, d:i32, x:i32) -> (i32, i32) {
-		return match self {
-			Action::Forward => (h + x, d),
-			Action::Down    => (h, d + x),
-			Action::Up      => (h, d - x)
-		}
-	}
-	fn exec_p2(&self, h:i32, d:i32, a:i32, x:i32) -> (i32, i32, i32) {
-		return match self {
-			Action::Forward => (h + x, d + x * a, a),
-			Action::Down   => (h, d, a + x),
-			Action::Up     => (h, d, a - x)
-		}
-	}
-}
-
 fn p1(filename: &String) {
 	let data_gen = BufReader::new(File::open(filename).unwrap()).lines();
 	let (mut horizontal, mut depth) = (0, 0);
 	for (_, line) in data_gen.enumerate() {
 		let line = line.unwrap();
 		let (action, x) = line.splitn(2, " ").collect_tuple().unwrap();
+		let x = x.parse::<i32>().unwrap();
 
-		let (h, d) = Action::from_str(action).unwrap().exec_p1(horizontal, depth, x.parse::<i32>().unwrap());
+		//https://github.com/rust-lang/rust/issues/71126
+		let (h, d) = match action {
+			"forward" => (horizontal + x, depth),
+			"down"    => (horizontal, depth + x),
+			"up"      => (horizontal, depth - x),
+			_         => panic!("Unknown action")
+		};
 		horizontal = h;
 		depth = d;
         }
@@ -54,8 +31,14 @@ fn p2(filename: &String) {
 	for (_, line) in data_gen.enumerate() {
                 let line = line.unwrap();
                 let (action, x) = line.splitn(2, " ").collect_tuple().unwrap();
+		let x = x.parse::<i32>().unwrap();
 
-                let (h, d, a) = Action::from_str(action).unwrap().exec_p2(horizontal, depth, aim, x.parse::<i32>().unwrap());
+                let (h, d, a) = match action {
+			"forward" => (horizontal + x, depth + x * aim, aim),
+			"down"    => (horizontal, depth, aim + x),
+			"up"      => (horizontal, depth, aim - x),
+			_         => panic!("Unknown action")
+		};
                 horizontal = h;
                 depth = d;
 		aim = a;
