@@ -3,8 +3,8 @@
 def p1(args):
 	actions = {
 		'forward': lambda h, d, x: (h + x, d),
-		'down': lambda h, d, x: (h, d + x),
-		'up': lambda h, d, x: (h, d - x)
+		'down'   : lambda h, d, x: (h, d + x),
+		'up'     : lambda h, d, x: (h, d - x)
 	}
 	horizontal, depth = 0, 0
 
