@@ -4,11 +4,11 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 fn p1(filename: &String) {
-	let mut data_gen = BufReader::new(File::open(filename).unwrap()).lines();
+	let data_gen = BufReader::new(File::open(filename).unwrap()).lines();
 }
 
 fn p2(filename: &String) {
-	let mut data_gen = BufReader::new(File::open(filename).unwrap()).lines();
+	let data_gen = BufReader::new(File::open(filename).unwrap()).lines();
 }
 
 fn main() {
