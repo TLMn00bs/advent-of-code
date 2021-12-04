@@ -1,3 +1,3 @@
 #!/bin/bash
 
-export PYTHONPATH="/media/shared/proyectos/aoc/2021:$PYTHONPATH"
+export PYTHONPATH="/media/shared/proyectos/advent-of-code/vLabayen/2021:$PYTHONPATH"
