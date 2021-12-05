@@ -4,8 +4,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use itertools::Itertools;
 use std::vec::Vec;
-//use counter::Counter;		//https://docs.rs/counter/0.5.2/counter/
-//use array_init::array_init;	//https://docs.rs/array-init/2.0.0/array_init/
 
 fn p1(filename: &String) {
 	let data_gen = BufReader::new(File::open(filename).unwrap()).lines();
@@ -13,11 +11,8 @@ fn p1(filename: &String) {
 	let mut num_ones: [i32; 12] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 	let mut n_lines = 0;
 	for (_, line) in data_gen.enumerate() {
-		let bin = line.unwrap();
-		for (col, c) in bin.chars().enumerate() {
-			if c == '1' {
-				num_ones[col] += 1;
-			}
+		for (col, c) in line.unwrap().chars().enumerate() {
+			if c == '1' { num_ones[col] += 1; }
 		}
 		n_lines += 1;
 	}
