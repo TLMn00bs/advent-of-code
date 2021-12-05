@@ -15,5 +15,7 @@ cargo new ${dx}_rs
 mv template.rs ${dx}_rs/src/main.rs
 
 if [ $# == 2 ]; then
-	curl --cookie "session=$2" "https://adventofcode.com/$(date +%Y)/day/$dx/input" > input.txt
+	# dx is, for example, d5, while the url must be just 5
+	dx_url="${dx:1}"	# Remove first character
+	curl --cookie "session=$2" "https://adventofcode.com/$(date +%Y)/day/${dx_url}/input" > input.txt
 fi
