@@ -29,48 +29,39 @@ fn p2(filename: &String) {
 	let data_gen = BufReader::new(File::open(filename).unwrap()).lines();
 
 	let mut report = Vec::new();
-	let mut num_ones: [i32; 12] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	let mut num_ones_first_bit = 0;
 	for (_, line) in data_gen.enumerate() {
 		let bin = line.unwrap();
-		for (col, c) in bin.chars().enumerate() {
-			if c == '1' {
-				num_ones[col] += 1;
-			}
-		}
+		let c = bin.chars().next().unwrap();
+		if c == '1' { num_ones_first_bit += 1; }
 		report.push(bin);
 	}
 
 	let mut oxygen_opts = report.clone();
-	let mut oxygen_ones = num_ones.to_vec();
+	let mut oxygen_ones = num_ones_first_bit;
 	for i in 0..12 {
-		let mcb = if oxygen_ones[i] >= ((&oxygen_opts).len() as i32 - oxygen_ones[i]) { '1' } else { '0' };
+		let mcb = if oxygen_ones >= ((&oxygen_opts).len() as i32 - oxygen_ones) { '1' } else { '0' };
 		oxygen_opts = oxygen_opts.iter().filter(|opt| opt.chars().nth(i).unwrap() == mcb).cloned().collect();
 		if oxygen_opts.len() <= 1 { break; }
 
-		for j in 0..12 { oxygen_ones[j] = 0; }
+		oxygen_ones = 0;
 		for opt in &oxygen_opts {
-			for (col, c) in opt.chars().enumerate() {
-				if c == '1' {
-					oxygen_ones[col] += 1;
-				}
-			}
+			let c = opt.chars().nth(i +  1).unwrap();
+			if c == '1' { oxygen_ones += 1; }
 		}
 	}
 
 	let mut co2_opts = report.clone();
-	let mut co2_ones = num_ones.to_vec();
+	let mut co2_ones = num_ones_first_bit;
 	for i in 0..12 {
-		let mcb = if co2_ones[i] >= ((&co2_opts).len() as i32 - co2_ones[i]) { '0' } else { '1' };
+		let mcb = if co2_ones >= ((&co2_opts).len() as i32 - co2_ones) { '0' } else { '1' };
 		co2_opts = co2_opts.iter().filter(|opt| opt.chars().nth(i).unwrap() == mcb).cloned().collect();
 		if co2_opts.len() <= 1 { break; }
 
-		for j in 0..12 { co2_ones[j] = 0; }
+		co2_ones = 0;
 		for opt in &co2_opts {
-			for (col, c) in opt.chars().enumerate() {
-				if c == '1' {
-					co2_ones[col] += 1;
-				}
-			}
+			let c = opt.chars().nth(i + 1).unwrap();
+			if c == '1' { co2_ones += 1; }
 		}
 	}
 
