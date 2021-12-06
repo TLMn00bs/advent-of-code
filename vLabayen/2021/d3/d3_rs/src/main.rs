@@ -26,43 +26,22 @@ fn p1(filename: &String) {
 }
 
 fn p2(filename: &String) {
-	let data_gen = BufReader::new(File::open(filename).unwrap()).lines();
-
-	let mut report = Vec::new();
-	let mut num_ones_first_bit = 0;
-	for (_, line) in data_gen.enumerate() {
-		let bin = line.unwrap();
-		let c = bin.chars().next().unwrap();
-		if c == '1' { num_ones_first_bit += 1; }
-		report.push(bin);
-	}
+	let report: Vec<String> = BufReader::new(File::open(filename).unwrap()).lines().map(|line| line.unwrap()).collect();
 
 	let mut oxygen_opts = report.clone();
-	let mut oxygen_ones = num_ones_first_bit;
 	for i in 0..12 {
+		let oxygen_ones = oxygen_opts.iter().map(|opt| opt.chars().nth(i).unwrap().to_digit(10).unwrap() as i32).sum::<i32>();
 		let mcb = if oxygen_ones >= ((&oxygen_opts).len() as i32 - oxygen_ones) { '1' } else { '0' };
 		oxygen_opts = oxygen_opts.iter().filter(|opt| opt.chars().nth(i).unwrap() == mcb).cloned().collect();
 		if oxygen_opts.len() <= 1 { break; }
-
-		oxygen_ones = 0;
-		for opt in &oxygen_opts {
-			let c = opt.chars().nth(i +  1).unwrap();
-			if c == '1' { oxygen_ones += 1; }
-		}
 	}
 
 	let mut co2_opts = report.clone();
-	let mut co2_ones = num_ones_first_bit;
 	for i in 0..12 {
+		let co2_ones = co2_opts.iter().map(|opt| opt.chars().nth(i).unwrap().to_digit(10).unwrap() as i32).sum::<i32>();
 		let mcb = if co2_ones >= ((&co2_opts).len() as i32 - co2_ones) { '0' } else { '1' };
 		co2_opts = co2_opts.iter().filter(|opt| opt.chars().nth(i).unwrap() == mcb).cloned().collect();
 		if co2_opts.len() <= 1 { break; }
-
-		co2_ones = 0;
-		for opt in &co2_opts {
-			let c = opt.chars().nth(i + 1).unwrap();
-			if c == '1' { co2_ones += 1; }
-		}
 	}
 
         let oxygen_dec = isize::from_str_radix(&oxygen_opts[0], 2).unwrap();
