@@ -1,6 +1,4 @@
 #!/bin/python3
-from numpy import median
-
 def p1(args):
 	with open(args.file, 'r') as f: hpositions = [int(h) for h in f.readline().strip().split(',')]
 	min_h, max_h = min(hpositions), max(hpositions)
