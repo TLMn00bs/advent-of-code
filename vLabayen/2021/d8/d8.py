@@ -1,28 +1,7 @@
 #!/bin/python3
 digit2len = lambda d: {'0': 6, '1': 2, '2': 5, '3': 5, '4': 4, '5': 5, '6': 6, '7': 3, '8': 7, '9': 6}[d]
 len2digit = lambda l: {2: ['1'], 3: ['7'], 4: ['4'], 5: ['2', '3', '5'], 6: ['0', '6', '9'], 7: ['8']}[l]
-
 all_segments = set('abcdefg')
-#digit2segments = lambda d: {
-#	'0': set(['a', 'b', 'c',      'e', 'f', 'g']),
-#	'1': set([          'c',           'f'     ]),
-#	'2': set(['a',      'c', 'd', 'e',      'g']),
-#	'3': set(['a',      'c', 'd',      'f', 'g']),
-#	'4': set([     'b', 'c', 'd',      'f'     ]),
-#	'5': set(['a', 'b',      'd',      'f', 'g']),
-#	'6': set(['a', 'b',      'd', 'e', 'f', 'g']),
-#	'7': set(['a',      'c',           'f'     ]),
-#	'8': set(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
-#	'9': set(['a', 'b', 'c', 'd',      'f', 'g']),
-#}[d]
-#segments2digit = lambda s: [str(digit) for digit in range(10) if digit2segment(str(digit)) == s][0]
-
-def a_wire(codes):
-	# We can know which is the a wire by taking the difference between 7 and 1.
-	# Both 7 and 1 has unique number of segments
-	one = [set(code) for code in codes if len(code) == digit2len('1')][0]
-	seven = [set(code) for code in codes if len(code) == digit2len('7')][0]
-	return list(seven - one)[0]
 
 def e_wire(codes):
 	# 4 has segments bcdf. 4 has a unique number of segments
