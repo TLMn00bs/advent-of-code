@@ -1,0 +1,39 @@
+name: Update our AoC leaderboard in a markdown table
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  update_readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+        with:
+          ref: 'main'
+      - name: Merge main on leaderboard
+        run: |-
+          git config --global user.email "actions@users.noreply.github.com"
+          git config --global user.name "README-bot"
+          git fetch origin leaderboard:leaderboard
+          git merge --allow-unrelated-histories -s ours leaderboard
+          git switch leaderboard
+          git update-index --assume-unchanged README.md
+          git merge --no-ff --no-commit main
+          git reset HEAD README.md
+          git checkout -- README.md
+          git commit -m "Merge branch 'leaderboard'"
+      - name: Update leaderboard
+        run: ./update_leaderboard.sh
+        env:
+          COOKIE: ${{ secrets.COOKIE }}
+      - name: Commit and push if changed
+        run: |-
+          git diff
+          git config --global user.email "actions@users.noreply.github.com"
+          git config --global user.name "README-bot"
+          git update-index --no-assume-unchanged README.md
+          mv leaderboard.md README.md
+          git add -A
+          git commit -m "Update leaderboard" || exit 0
+          git push origin leaderboard
