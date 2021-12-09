@@ -22,4 +22,4 @@ Here you can find some solutions to Advent of Code 2020.
  | [@calvo111979](https://github.com/calvo111979)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/calvo111979) | 22 |
  | [@mariaove](https://github.com/mariaove)| [Java](https://github.com/TLMn00bs/advent-of-code/tree/master/mariaove) | 18 |
  | [@jesusarell](https://github.com/jesusarell)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/jesusarell) | 3 |
- | [@0rb3](https://github.com/0rb3)| [](https://github.com/TLMn00bs/advent-of-code/tree/master/0rb3) | 0 |
+ | [@i97orbegozo](https://github.com/i97orbegozo)| [](https://github.com/TLMn00bs/advent-of-code/tree/master/i97orbegozo) | 0 |
