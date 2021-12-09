@@ -33,5 +33,4 @@ jobs:
           git commit -m "Update leaderboard" || exit 0
           git push origin leaderboard
           git switch master
-          git merge --no-ff --no-commit leaderboard
-          git commit -m "Merge branch 'master'"
+          git merge --no-ff leaderboard
