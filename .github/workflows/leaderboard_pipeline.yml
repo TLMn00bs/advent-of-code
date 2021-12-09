@@ -24,7 +24,7 @@ jobs:
         run: ./update_leaderboard.sh
         env:
           COOKIE: ${{ secrets.COOKIE }}
-      - name: Commit and push if changed
+      - name: Commit, push and merge if changed
         run: |-
           git diff
           git config --global user.email "actions@users.noreply.github.com"
@@ -33,4 +33,5 @@ jobs:
           git commit -m "Update leaderboard" || exit 0
           git push origin leaderboard
           git switch master
-          git merge --no-ff leaderboard
+          git merge leaderboard
+          git push
