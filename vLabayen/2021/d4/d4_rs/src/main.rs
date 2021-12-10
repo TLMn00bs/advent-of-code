@@ -64,8 +64,9 @@ fn p2(filename: &String) {
 	let n_boards = boards.len();
 	for n in numbers {
 		drawn_numbers.insert(n);
-		let use_idx: Vec<usize> = (0..n_boards).into_iter().filter(|idx| !ignore_boards.contains(idx)).collect();
-		for i in use_idx {
+		for i in 0..n_boards {
+			if ignore_boards.contains(&i) { continue; }
+
 			let b = &boards[i];
 			if check_board(&b, &drawn_numbers) {
 				if n_boards - ignore_boards.len() == 1 {
