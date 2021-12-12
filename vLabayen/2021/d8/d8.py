@@ -10,28 +10,28 @@ def e_wire(codes):
 	# 6 has segments abdefg --> From the segments of 4, c is the only one missing
 	# 9 has segments abcdfg --> From the segments of 4, no one is missing. Therefore we can map the missing e to the missing segment of the given 9
 	four = [set(code) for code in codes if len(code) == digit2len('4')][0]
-	one_six_nine = [set(code) for code in codes if len(code) == digit2len('0')]
-	for code in one_six_nine:
+	zero_six_nine = [set(code) for code in codes if len(code) == digit2len('0')]
+	for code in zero_six_nine:
 		if len(four - code) == 0: return list(all_segments - code)[0]
 
 def nine_segment(codes):
 	# Same as e_wire, but return the 9 segment
 	four = [set(code) for code in codes if len(code) == digit2len('4')][0]
-	one_six_nine = [set(code) for code in codes if len(code) == digit2len('0')]
-	for code in one_six_nine:
+	zero_six_nine = [set(code) for code in codes if len(code) == digit2len('0')]
+	for code in zero_six_nine:
 		if len(four - code) == 0: return code
 
 def six_segment(codes):
 	# Similar to nine_segment, but compare with 1 instead of 4.
 	one = [set(code) for code in codes if len(code) == digit2len('1')][0]
-	one_six_nine = [set(code) for code in codes if len(code) == digit2len('0')]
-	for code in one_six_nine:
+	zero_six_nine = [set(code) for code in codes if len(code) == digit2len('0')]
+	for code in zero_six_nine:
 		if len(one - code) == 1: return code
 
 def zero_segment(codes, six, nine):
 	# Get zero by filtering 6 and 9 from codes with len 6
-	one_six_nine = [set(code) for code in codes if len(code) == digit2len('0')]
-	for code in one_six_nine:
+	zero_six_nine = [set(code) for code in codes if len(code) == digit2len('0')]
+	for code in zero_six_nine:
 		if code != six and code != nine: return code
 
 def three_segment(codes):
@@ -84,6 +84,7 @@ def p2(args):
 				'8': [set(code) for code in input_codes if len(code) == digit2len('8')][0],
 				'9': nine
 			}[d]
+
 			messedsegment2digit = lambda s: [str(digit) for digit in range(10) if digit2messedsegment(str(digit)) == set(s)][0]
 			output_digits = [messedsegment2digit(code) for code in output_codes]
 			output_number = int(''.join(output_digits))
