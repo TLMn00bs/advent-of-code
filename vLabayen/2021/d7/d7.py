@@ -1,4 +1,6 @@
 #!/bin/python3
+from functools import lru_cache
+
 def p1(args):
 	with open(args.file, 'r') as f: hpositions = [int(h) for h in f.readline().strip().split(',')]
 	min_h, max_h = min(hpositions), max(hpositions)
@@ -7,7 +9,10 @@ def p1(args):
 
 def fuel_usage(start, end):
 	if start > end: start, end = end, start
-	return sum(range(1, end - start + 1))
+	return fuel_cost(end - start)
+
+@lru_cache(maxsize=500000)
+def fuel_cost(diff): return sum(range(1, diff + 1))
 
 def p2(args):
 	with open(args.file, 'r') as f: hpositions = [int(h) for h in f.readline().strip().split(',')]
