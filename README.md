@@ -3,8 +3,8 @@ Here you can find some solutions to Advent of Code 2021.
 
  |  ☃️  |  🧰  |  ⭐  |
  | :--: | :--: | :-: |
- | [@lassa97](https://github.com/lassa97)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/lassa97) | 28 |
  | [@vLabayen](https://github.com/vLabayen)| [Python / Rust](https://github.com/TLMn00bs/advent-of-code/tree/master/vLabayen) | 28 |
+ | [@lassa97](https://github.com/lassa97)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/lassa97) | 28 |
  | [@calvo111979](https://github.com/calvo111979)| [Rust](https://github.com/TLMn00bs/advent-of-code/tree/master/calvo111979) | 15 |
  | [@jartigag](https://github.com/jartigag)| [Typescript](https://github.com/TLMn00bs/advent-of-code/tree/master/jartigag) | 11 |
  | [@mariaove](https://github.com/mariaove)| [Java](https://github.com/TLMn00bs/advent-of-code/tree/master/mariaove) | 9 |
