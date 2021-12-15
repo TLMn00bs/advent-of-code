@@ -54,7 +54,7 @@ def p2(args):
 		# The exit node is already in the target node with no move required
 		nodes[(num_rows - 1, num_cols - 1)]['reach_by'] = 0
 
-	# Start with the end node as the only one that needs to update
+	# Start with the end node as the only one that needs to update. Loop until the path stabilizes
 	update_queue = set([(num_rows - 1, num_cols - 1)])
 	while len(update_queue) != 0:
 
