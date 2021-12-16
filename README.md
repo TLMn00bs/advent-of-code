@@ -3,12 +3,12 @@ Here you can find some solutions to Advent of Code 2021.
 
  |  ☃️  |  🧰  |  ⭐  |
  | :--: | :--: | :-: |
- | [@vLabayen](https://github.com/vLabayen)| [Python / Rust](https://github.com/TLMn00bs/advent-of-code/tree/master/vLabayen) | 30 |
- | [@lassa97](https://github.com/lassa97)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/lassa97) | 28 |
- | [@calvo111979](https://github.com/calvo111979)| [Rust](https://github.com/TLMn00bs/advent-of-code/tree/master/calvo111979) | 15 |
+ | [@vLabayen](https://github.com/vLabayen)| [Python / Rust](https://github.com/TLMn00bs/advent-of-code/tree/master/vLabayen) | 32 |
+ | [@lassa97](https://github.com/lassa97)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/lassa97) | 32 |
+ | [@calvo111979](https://github.com/calvo111979)| [Rust](https://github.com/TLMn00bs/advent-of-code/tree/master/calvo111979) | 19 |
+ | [@jesusarell](https://github.com/jesusarell)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/jesusarell) | 12 |
  | [@jartigag](https://github.com/jartigag)| [Typescript](https://github.com/TLMn00bs/advent-of-code/tree/master/jartigag) | 11 |
- | [@mariaove](https://github.com/mariaove)| [Java](https://github.com/TLMn00bs/advent-of-code/tree/master/mariaove) | 9 |
- | [@jesusarell](https://github.com/jesusarell)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/jesusarell) | 6 |
+ | [@mariaove](https://github.com/mariaove)| [Java](https://github.com/TLMn00bs/advent-of-code/tree/master/mariaove) | 11 |
  | [@i97orbegozo](https://github.com/i97orbegozo)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/i97orbegozo) | 6 |
 
 # 🎄 AoC - 2020
