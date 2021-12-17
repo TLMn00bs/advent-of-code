@@ -20,9 +20,9 @@ data=$(jq '.members | flatten | sort_by(.stars) | reverse | .[] | {name: .name, 
 
 echo $data | jq -j '.name," ",.stars,"\n"' | \
 awk 'BEGIN{
-        langs["lassa97"]    ="Python"
-        langs["vLabayen"]   ="Python / Rust"
-        langs["calvo111979"]="Rust"
+        langs["lassa97"]    ="Python (after day 3, using grinch.py to grab solutions from other people)"
+        langs["vLabayen"]   ="Python (Rust a few days later)"
+        langs["calvo111979"]="Python (Rust a few days later)"
         langs["jartigag"]   ="Typescript"
         langs["mariaove"]   ="Java"
         langs["jesusarell"] ="Python"
