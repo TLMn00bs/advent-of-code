@@ -3,9 +3,9 @@ Here you can find some solutions to Advent of Code 2021.
 
  |  ☃️  |  🧰  |  ⭐  |
  | :--: | :--: | :-: |
- | [@vLabayen](https://github.com/vLabayen)| [Python / Rust](https://github.com/TLMn00bs/advent-of-code/tree/master/vLabayen) | 34 |
- | [@lassa97](https://github.com/lassa97)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/lassa97) | 32 |
- | [@calvo111979](https://github.com/calvo111979)| [Rust](https://github.com/TLMn00bs/advent-of-code/tree/master/calvo111979) | 21 |
+ | [@vLabayen](https://github.com/vLabayen)| [Python (Rust a few days later)](https://github.com/TLMn00bs/advent-of-code/tree/master/vLabayen) | 34 |
+ | [@lassa97](https://github.com/lassa97)| [Python (after day 3, using grinch.py to grab solutions from other people)](https://github.com/TLMn00bs/advent-of-code/tree/master/lassa97) | 32 |
+ | [@calvo111979](https://github.com/calvo111979)| [Python (Rust a few days later)](https://github.com/TLMn00bs/advent-of-code/tree/master/calvo111979) | 21 |
  | [@jesusarell](https://github.com/jesusarell)| [Python](https://github.com/TLMn00bs/advent-of-code/tree/master/jesusarell) | 14 |
  | [@mariaove](https://github.com/mariaove)| [Java](https://github.com/TLMn00bs/advent-of-code/tree/master/mariaove) | 13 |
  | [@jartigag](https://github.com/jartigag)| [Typescript](https://github.com/TLMn00bs/advent-of-code/tree/master/jartigag) | 11 |
