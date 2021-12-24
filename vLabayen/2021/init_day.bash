@@ -7,6 +7,11 @@ if [ $# -lt 1 ]; then
 fi
 dx=$1
 
+if [ -d $dx ]; then
+	echo "Error: $dx already exists" 1>&2
+	exit 1
+fi
+
 cp -r $here/template $here/$dx
 cd $here/$dx
 
