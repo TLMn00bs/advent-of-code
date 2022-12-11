@@ -1,5 +1,7 @@
 #!/bin/python3
-def process(file):
+from domain import *
+
+def read_file(file):
 	pass
 
 def p1(args):
