@@ -1,5 +1,5 @@
 #!/bin/python3
-from domain import Hand
+from domain import Hand, get_outcome, get_points
 
 opponent_strategy = {'A': Hand.ROCK, 'B': Hand.PAPER, 'C': Hand.SCISSORS}
 
@@ -12,7 +12,10 @@ def p1(args):
 			'opponent': opponent_strategy[opponent_encrypted_hand],
 			'player'  : player_strategy[player_encrypted_hand],
 		} for opponent_encrypted_hand, player_encrypted_hand in games]
-		print(hands)
+
+	outcomes = [get_outcome(**hand) for hand in hands]
+	points = [get_points(hand['player'], outcome) for hand, outcome in zip(hands, outcomes)]
+	print(sum(points))
 
 def p2(args):
 	pass

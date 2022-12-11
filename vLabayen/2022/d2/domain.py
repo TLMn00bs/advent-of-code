@@ -1,12 +1,12 @@
-from enum import Enum
+from enum import IntEnum
 from dataclasses import dataclass
 
-class Hand(Enum):
+class Hand(IntEnum):
 	ROCK = 1
 	PAPER = 2
 	SCISSORS = 3
 
-class Outcome(Enum):
+class Outcome(IntEnum):
 	WIN = 6
 	DRAW = 3
 	LOSE = 0
@@ -40,7 +40,17 @@ def get_outcome(opponent: Hand, player: Hand) -> Outcome:
 	if player == gameHands[opponent]['toWin']: return Outcome.WIN
 	return Outcome.LOSE
 
-def get_points()
+def get_points(player: Hand, outcome: Outcome) -> int:
+	''' Returns the points associated to the player's hand & game outcome
+	
+	>>> get_points(Hand.PAPER, Outcome.WIN)
+	8
+	>>> get_points(Hand.ROCK, Outcome.LOSE)
+	1
+	>>> get_points(Hand.SCISSORS, Outcome.DRAW)
+	6
+	'''
+	return player.value + outcome.value
 
 if __name__ == '__main__':
 	import doctest
