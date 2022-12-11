@@ -2,10 +2,17 @@
 from domain import *
 
 def read_file(file):
-	pass
+	with open(args.file, 'r') as f:
+		rucksacks = [line.strip() for line in f]
+
+	return rucksacks
 
 def p1(args):
-	pass
+	rucksacks = read_file(args.file)
+	rucksacks_compartments = [get_rucksack_compartments(rucksack) for rucksack in rucksacks]
+	shared_items = [get_shared_item(*compartments) for compartments in rucksacks_compartments]
+	items_priority = [get_item_priority(item) for item in shared_items]
+	print(sum(items_priority))
 
 def p2(args):
 	pass
