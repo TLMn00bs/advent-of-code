@@ -52,6 +52,20 @@ def get_points(player: Hand, outcome: Outcome) -> int:
 	'''
 	return player.value + outcome.value
 
+def get_player_hand(opponent: Hand, outcome: Outcome) -> int:
+	''' Returns the player's required hand to get the given outcome
+	
+	>>> get_player_hand(Hand.ROCK, Outcome.DRAW)
+	<Hand.ROCK: 1>
+	>>> get_player_hand(Hand.PAPER, Outcome.LOSE)
+	<Hand.ROCK: 1>
+	>>> get_player_hand(Hand.SCISSORS, Outcome.WIN)
+	<Hand.ROCK: 1>
+	'''
+	if outcome == Outcome.WIN: return gameHands[opponent]['toWin']
+	if outcome == Outcome.LOSE: return gameHands[opponent]['toLose']
+	return opponent
+
 if __name__ == '__main__':
 	import doctest
 	doctest.testmod()

@@ -1,24 +1,28 @@
 #!/bin/python3
-from domain import Hand, get_outcome, get_points
-
+from domain import Hand, Outcome, get_outcome, get_points, get_player_hand
 opponent_strategy = {'A': Hand.ROCK, 'B': Hand.PAPER, 'C': Hand.SCISSORS}
 
-def p1(args):
-	player_strategy = {'X': Hand.ROCK, 'Y': Hand.PAPER, 'Z': Hand.SCISSORS}
-
+def read_file(file, player_strategy):
 	with open(args.file, 'r') as f:
 		games = [line.strip().split(" ") for line in f]
-		hands = [{
-			'opponent': opponent_strategy[opponent_encrypted_hand],
-			'player'  : player_strategy[player_encrypted_hand],
-		} for opponent_encrypted_hand, player_encrypted_hand in games]
+		opponent, player = zip(*[(
+			opponent_strategy[opponent_encrypted_hand],
+			player_strategy[player_encrypted_hand]
+		) for opponent_encrypted_hand, player_encrypted_hand in games])
 
-	outcomes = [get_outcome(**hand) for hand in hands]
-	points = [get_points(hand['player'], outcome) for hand, outcome in zip(hands, outcomes)]
+	return opponent, player
+
+def p1(args):
+	opponent, player = read_file(args.file, {'X': Hand.ROCK, 'Y': Hand.PAPER, 'Z': Hand.SCISSORS})
+	outcomes = [get_outcome(*hands) for hands in zip(opponent, player)]
+	points = [get_points(hand, outcome) for hand, outcome in zip(player, outcomes)]
 	print(sum(points))
 
 def p2(args):
-	pass
+	opponent, outcomes = read_file(args.file, {'X': Outcome.LOSE, 'Y': Outcome.DRAW, 'Z': Outcome.WIN})
+	player = [get_player_hand(hand, outcome) for hand, outcome in zip(opponent, outcomes)]
+	points = [get_points(hand, outcome) for hand, outcome in zip(player, outcomes)]
+	print(sum(points))
 
 if __name__ == '__main__':
 	import argparse
