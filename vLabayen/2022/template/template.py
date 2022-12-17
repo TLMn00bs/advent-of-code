@@ -1,14 +1,15 @@
 #!/bin/python3
 from domain import *
 
-def read_file(file):
-	pass
+def read_file(file: str):
+	with open(file, 'r') as f:
+		pass
 
 def p1(args):
-	pass
+	_ = read_file(args.file)
 
 def p2(args):
-	pass
+	_ = read_file(args.file)
 
 if __name__ == '__main__':
 	import argparse
