@@ -33,39 +33,36 @@ def get_operation(text: str) -> typing.Callable[[int], int]:
 
 parse_divisible_rgx = re.compile('Test: divisible by ([0-9]+)')
 parse_target_monkey_rgx = re.compile('If (?:true|false): throw to monkey ([0-9]+)')
-def get_action(lines: typing.List[str]) -> typing.Callable[[int], int]:
+def get_action(lines: typing.List[str]) -> typing.Tuple[int, int, int]:
 	''' Parse action
 	
-	>>> action = get_action([
+	>>> get_action([
 	...		'Test: divisible by 23',
 	...		'If true: throw to monkey 2',
 	...		'If false: throw to monkey 3',
 	... ])
-	>>> action(23)
-	2
-	>>> action(24)
-	3
+	(23, 2, 3)
 
-	>>> action = get_action([
+	>>> get_action([
 	...		'Test: divisible by 19',
 	...		'If true: throw to monkey 2',
 	...		'If false: throw to monkey 0',
 	... ])
-	>>> action(19)
-	2
-	>>> action(20)
-	0
+	(19, 2, 0)
 	'''
 	divisible_by = int(parse_divisible_rgx.match(lines[0]).group(1))
 	monkey_if_true  = int(parse_target_monkey_rgx.match(lines[1]).group(1))
 	monkey_if_false = int(parse_target_monkey_rgx.match(lines[2]).group(1))
-	return lambda new: monkey_if_true if (new % divisible_by == 0) else monkey_if_false
+	return divisible_by, monkey_if_true, monkey_if_false
+	# return lambda new: 
 
 @dataclass
 class Monkey:
 	items: typing.Deque[int]
 	operation: typing.Callable[[int], int]
-	action: typing.Callable[[int], int]
+	divisible_by: int
+	monkey_if_true: int
+	monkey_if_false: int
 	num_inspected_items: int = 0
 
 	@staticmethod
@@ -80,7 +77,7 @@ class Monkey:
 		...		'    If true: throw to monkey 2',
 		...		'    If false: throw to monkey 3',
 		... ])
-		Monkey(items=deque([79, 98]), operation=..., action=..., num_inspected_items=0)
+		Monkey(items=deque([79, 98]), operation=..., divisible_by=23, monkey_if_true=2, monkey_if_false=3, num_inspected_items=0)
 
 		>>> Monkey.from_text([
 		...		'Monkey 1:',
@@ -90,7 +87,7 @@ class Monkey:
 		...		'  If true: throw to monkey 2',
 		...		'  If false: throw to monkey 0',
 		...	])
-		Monkey(items=deque([54, 65, 75, 74]), operation=..., action=..., num_inspected_items=0)
+		Monkey(items=deque([54, 65, 75, 74]), operation=..., divisible_by=19, monkey_if_true=2, monkey_if_false=0, num_inspected_items=0)
 
 		>>> Monkey.from_text([
 		... 	'Monkey 3:',
@@ -100,19 +97,40 @@ class Monkey:
 		...		'  If true: throw to monkey 0',
 		...		'  If false: throw to monkey 1',
 		... ])
-		Monkey(items=deque([74]), operation=..., action=..., num_inspected_items=0)
+		Monkey(items=deque([74]), operation=..., divisible_by=17, monkey_if_true=0, monkey_if_false=1, num_inspected_items=0)
 		'''
-		return Monkey(
-			items = deque(get_starting_items(lines[1].strip())),
-			operation = get_operation(lines[2].strip()),
-			action = get_action([line.strip() for line in lines[3:]])
-		)
+		items = deque(get_starting_items(lines[1].strip()))
+		operation = get_operation(lines[2].strip())
+		divisible_by, if_true, if_false = get_action([line.strip() for line in lines[3:]])
+		return Monkey(items, operation, divisible_by, if_true, if_false)
 
 	def run_turn(self) -> typing.Iterable[typing.Tuple[int, int]]:
+		''' Runs a monkey's turn
+		
+		>>> list(Monkey.from_text([
+		...		'Monkey 0:',
+		...		'  Starting items: 79, 98',
+		...		'  Operation: new = old * 19',
+		...		'  Test: divisible by 23',
+		...		'    If true: throw to monkey 2',
+		...		'    If false: throw to monkey 3',
+		... ]).run_turn())
+		[(500, 3), (620, 3)]
+
+		>>> list(Monkey.from_text([
+		...		'Monkey 1:',
+		...		'Starting items: 54, 65, 75, 74',
+		...		'Operation: new = old + 6',
+		...		'Test: divisible by 19',
+		...		'  If true: throw to monkey 2',
+		...		'  If false: throw to monkey 0',
+		...	]).run_turn())
+		[(20, 0), (23, 0), (27, 0), (26, 0)]
+		'''
 		for _ in repeat(None, len(self.items)):
 			worry_level = self.items.popleft()
 			new_worry_level = self.operation(worry_level) // 3
-			target_monkey = self.action(new_worry_level)
+			target_monkey = self.monkey_if_true if (new_worry_level % self.divisible_by == 0) else self.monkey_if_false
 
 			self.num_inspected_items += 1
 			yield new_worry_level, target_monkey
