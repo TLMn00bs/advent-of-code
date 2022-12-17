@@ -126,15 +126,19 @@ class Rope:
 
 		inc_y, inc_x = direction.incr()
 		self.knots[0] = head_y + inc_y, head_x + inc_x
-		self.follow()
+
+		for i in range(1, len(self.knots)):
+			self.follow(i)
 		
 		return self
 
-	def follow(self):
-		if Rope.is_touching(self.knots[0], self.knots[1]): return
-		
-		head_y, head_x = self.knots[0]
-		tail_y, tail_x = self.knots[1]
+	def follow(self, tail_idx):
+		head = self.knots[tail_idx - 1]
+		tail = self.knots[tail_idx]
+		if Rope.is_touching(head, tail): return
+
+		head_y, head_x = head
+		tail_y, tail_x = tail
 
 		y_diff = head_y - tail_y
 		x_diff = head_x - tail_x
@@ -143,7 +147,7 @@ class Rope:
 			if diff == 0: return 0
 			return -1 if diff < 0 else 1
 
-		self.knots[1] = (
+		self.knots[tail_idx] = (
 			tail_y + get_tail_movement(y_diff),
 			tail_x + get_tail_movement(x_diff),
 		)
