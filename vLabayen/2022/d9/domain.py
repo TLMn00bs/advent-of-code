@@ -44,21 +44,21 @@ class Rope:
 	def is_touching(head: typing.Tuple[int, int], tail: typing.Tuple[int, int]):
 		''' Returns whether the head and tail are touching
 		
-		>>> Rope().is_touching((0, 0), (0, 0))
+		>>> Rope.is_touching((0, 0), (0, 0))
 		True
-		>>> Rope().is_touching((0, 1), (0, 0))
+		>>> Rope.is_touching((0, 1), (0, 0))
 		True
-		>>> Rope().is_touching((1, 1), (0, 0))
+		>>> Rope.is_touching((1, 1), (0, 0))
 		True
-		>>> Rope().is_touching((2, 1), (3, 2))
+		>>> Rope.is_touching((2, 1), (3, 2))
 		True
-		>>> Rope().is_touching((2, 0), (0, 0))
+		>>> Rope.is_touching((2, 0), (0, 0))
 		False
-		>>> Rope().is_touching((2, 1), (0, 0))
+		>>> Rope.is_touching((2, 1), (0, 0))
 		False
-		>>> Rope().is_touching((0, 0), (2, 1))
+		>>> Rope.is_touching((0, 0), (2, 1))
 		False
-		>>> Rope().is_touching((2, 1), (4, 2))
+		>>> Rope.is_touching((2, 1), (4, 2))
 		False
 		'''
 		head_y, head_x = head
@@ -128,7 +128,7 @@ class Rope:
 		return self
 
 	def follow(self):
-		if self.is_touching(self.head, self.tail): return
+		if Rope.is_touching(self.head, self.tail): return
 		
 		head_y, head_x = self.head
 		tail_y, tail_x = self.tail
