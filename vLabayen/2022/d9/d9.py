@@ -19,7 +19,16 @@ def p1(args):
 	print(len(tail_visited_positions))
 
 def p2(args):
-	pass
+	steps = read_file(args.file)
+	rope = Rope(10)
+
+	tail_visited_positions = set()
+	for direction in steps:
+		rope.move(direction)
+		tail_visited_positions.add(rope.knots[-1])
+
+	print(len(tail_visited_positions))
+
 
 if __name__ == '__main__':
 	import argparse
