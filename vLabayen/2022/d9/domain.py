@@ -37,8 +37,11 @@ class MotionStep:
 
 @dataclass
 class Rope:
-	head: typing.Tuple[int, int] = 0, 0
-	tail: typing.Tuple[int, int] = 0, 0
+	knots: typing.List[typing.Tuple[int, int]]
+
+	def __init__(self, num_knots:int):
+		assert num_knots > 1
+		self.knots = [(0, 0) for _ in range(num_knots)]
 
 	@staticmethod
 	def is_touching(head: typing.Tuple[int, int], tail: typing.Tuple[int, int]):
@@ -69,69 +72,69 @@ class Rope:
 	def move(self, direction: MotionDirection):
 		''' Move both the head & tail
 		
-		>>> r = Rope()
+		>>> r = Rope(2)
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(0, 1), tail=(0, 0))
+		Rope(knots=[(0, 1), (0, 0)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(0, 2), tail=(0, 1))
+		Rope(knots=[(0, 2), (0, 1)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(0, 3), tail=(0, 2))
+		Rope(knots=[(0, 3), (0, 2)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(0, 4), tail=(0, 3))
+		Rope(knots=[(0, 4), (0, 3)])
 		>>> r.move(MotionDirection.UP)
-		Rope(head=(1, 4), tail=(0, 3))
+		Rope(knots=[(1, 4), (0, 3)])
 		>>> r.move(MotionDirection.UP)
-		Rope(head=(2, 4), tail=(1, 4))
+		Rope(knots=[(2, 4), (1, 4)])
 		>>> r.move(MotionDirection.UP)
-		Rope(head=(3, 4), tail=(2, 4))
+		Rope(knots=[(3, 4), (2, 4)])
 		>>> r.move(MotionDirection.UP)
-		Rope(head=(4, 4), tail=(3, 4))
+		Rope(knots=[(4, 4), (3, 4)])
 		>>> r.move(MotionDirection.LEFT)
-		Rope(head=(4, 3), tail=(3, 4))
+		Rope(knots=[(4, 3), (3, 4)])
 		>>> r.move(MotionDirection.LEFT)
-		Rope(head=(4, 2), tail=(4, 3))
+		Rope(knots=[(4, 2), (4, 3)])
 		>>> r.move(MotionDirection.LEFT)
-		Rope(head=(4, 1), tail=(4, 2))
+		Rope(knots=[(4, 1), (4, 2)])
 		>>> r.move(MotionDirection.DOWN)
-		Rope(head=(3, 1), tail=(4, 2))
+		Rope(knots=[(3, 1), (4, 2)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(3, 2), tail=(4, 2))
+		Rope(knots=[(3, 2), (4, 2)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(3, 3), tail=(4, 2))
+		Rope(knots=[(3, 3), (4, 2)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(3, 4), tail=(3, 3))
+		Rope(knots=[(3, 4), (3, 3)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(3, 5), tail=(3, 4))
+		Rope(knots=[(3, 5), (3, 4)])
 		>>> r.move(MotionDirection.DOWN)
-		Rope(head=(2, 5), tail=(3, 4))
+		Rope(knots=[(2, 5), (3, 4)])
 		>>> r.move(MotionDirection.LEFT)
-		Rope(head=(2, 4), tail=(3, 4))
+		Rope(knots=[(2, 4), (3, 4)])
 		>>> r.move(MotionDirection.LEFT)
-		Rope(head=(2, 3), tail=(3, 4))
+		Rope(knots=[(2, 3), (3, 4)])
 		>>> r.move(MotionDirection.LEFT)
-		Rope(head=(2, 2), tail=(2, 3))
+		Rope(knots=[(2, 2), (2, 3)])
 		>>> r.move(MotionDirection.LEFT)
-		Rope(head=(2, 1), tail=(2, 2))
+		Rope(knots=[(2, 1), (2, 2)])
 		>>> r.move(MotionDirection.LEFT)
-		Rope(head=(2, 0), tail=(2, 1))
+		Rope(knots=[(2, 0), (2, 1)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(2, 1), tail=(2, 1))
+		Rope(knots=[(2, 1), (2, 1)])
 		>>> r.move(MotionDirection.RIGHT)
-		Rope(head=(2, 2), tail=(2, 1))
+		Rope(knots=[(2, 2), (2, 1)])
 		'''
-		head_y, head_x = self.head
+		head_y, head_x = self.knots[0]
 
 		inc_y, inc_x = direction.incr()
-		self.head = head_y + inc_y, head_x + inc_x
+		self.knots[0] = head_y + inc_y, head_x + inc_x
 		self.follow()
 		
 		return self
 
 	def follow(self):
-		if Rope.is_touching(self.head, self.tail): return
+		if Rope.is_touching(self.knots[0], self.knots[1]): return
 		
-		head_y, head_x = self.head
-		tail_y, tail_x = self.tail
+		head_y, head_x = self.knots[0]
+		tail_y, tail_x = self.knots[1]
 
 		y_diff = head_y - tail_y
 		x_diff = head_x - tail_x
@@ -140,7 +143,7 @@ class Rope:
 			if diff == 0: return 0
 			return -1 if diff < 0 else 1
 
-		self.tail = (
+		self.knots[1] = (
 			tail_y + get_tail_movement(y_diff),
 			tail_x + get_tail_movement(x_diff),
 		)

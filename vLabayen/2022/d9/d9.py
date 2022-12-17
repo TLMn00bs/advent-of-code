@@ -9,12 +9,12 @@ def read_file(file):
 
 def p1(args):
 	steps = read_file(args.file)
-	rope = Rope()
+	rope = Rope(2)
 
 	tail_visited_positions = set()
 	for direction in steps:
 		rope.move(direction)
-		tail_visited_positions.add(rope.tail)
+		tail_visited_positions.add(rope.knots[-1])
 
 	print(len(tail_visited_positions))
 
