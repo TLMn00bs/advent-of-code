@@ -13,7 +13,7 @@ def read_file(file: str):
 
 def p1(args):
 	monkeys = read_file(args.file)
-	for _ in repeat(None, 20): run_round(monkeys)
+	for _ in repeat(None, 20): run_round(monkeys, lambda worry_level: worry_level // 3)
 	top_inspected_items = sorted([m.num_inspected_items for m in monkeys], reverse=True)[:2]
 	print(reduce(lambda acc, num: acc * num, top_inspected_items, 1))
 

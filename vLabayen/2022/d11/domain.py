@@ -104,7 +104,7 @@ class Monkey:
 		divisible_by, if_true, if_false = get_action([line.strip() for line in lines[3:]])
 		return Monkey(items, operation, divisible_by, if_true, if_false)
 
-	def run_turn(self) -> typing.Iterable[typing.Tuple[int, int]]:
+	def run_turn(self, relief_action: typing.Callable[[int], int]) -> typing.Iterable[typing.Tuple[int, int]]:
 		''' Runs a monkey's turn
 		
 		>>> list(Monkey.from_text([
@@ -114,7 +114,7 @@ class Monkey:
 		...		'  Test: divisible by 23',
 		...		'    If true: throw to monkey 2',
 		...		'    If false: throw to monkey 3',
-		... ]).run_turn())
+		... ]).run_turn(lambda worry_level: worry_level // 3))
 		[(500, 3), (620, 3)]
 
 		>>> list(Monkey.from_text([
@@ -124,21 +124,23 @@ class Monkey:
 		...		'Test: divisible by 19',
 		...		'  If true: throw to monkey 2',
 		...		'  If false: throw to monkey 0',
-		...	]).run_turn())
+		...	]).run_turn(lambda worry_level: worry_level // 3))
 		[(20, 0), (23, 0), (27, 0), (26, 0)]
 		'''
 		for _ in repeat(None, len(self.items)):
 			worry_level = self.items.popleft()
-			new_worry_level = self.operation(worry_level) // 3
-			target_monkey = self.monkey_if_true if (new_worry_level % self.divisible_by == 0) else self.monkey_if_false
+			worry_level_while_inspecting = self.operation(worry_level)
+			final_worry_level = relief_action(worry_level_while_inspecting)
+
+			target_monkey = self.monkey_if_true if (final_worry_level % self.divisible_by == 0) else self.monkey_if_false
 
 			self.num_inspected_items += 1
-			yield new_worry_level, target_monkey
+			yield final_worry_level, target_monkey
 
 	def add_item(self, worry_level) -> None:
 		self.items.append(worry_level)
 
-def run_round(monkeys: typing.List[Monkey]) -> None:
+def run_round(monkeys: typing.List[Monkey], relief_action: typing.Callable[[int], int]) -> None:
 	''' Run a round
 	
 	>>> monkeys = [
@@ -177,23 +179,23 @@ def run_round(monkeys: typing.List[Monkey]) -> None:
 	... ]
 	>>> get_items = lambda monkeys: {idx: list(monkey.items) for idx, monkey in enumerate(monkeys)}
 
-	>>> get_items(run_round(monkeys))
+	>>> get_items(run_round(monkeys, lambda worry_level: worry_level // 3))
 	{0: [20, 23, 27, 26], 1: [2080, 25, 167, 207, 401, 1046], 2: [], 3: []}
-	>>> get_items(run_round(monkeys))
+	>>> get_items(run_round(monkeys, lambda worry_level: worry_level // 3))
 	{0: [695, 10, 71, 135, 350], 1: [43, 49, 58, 55, 362], 2: [], 3: []}
-	>>> get_items(run_round(monkeys))
+	>>> get_items(run_round(monkeys, lambda worry_level: worry_level // 3))
 	{0: [16, 18, 21, 20, 122], 1: [1468, 22, 150, 286, 739], 2: [], 3: []}
-	>>> get_items(run_round(monkeys))
+	>>> get_items(run_round(monkeys, lambda worry_level: worry_level // 3))
 	{0: [491, 9, 52, 97, 248, 34], 1: [39, 45, 43, 258], 2: [], 3: []}
-	>>> get_items(run_round(monkeys))
+	>>> get_items(run_round(monkeys, lambda worry_level: worry_level // 3))
 	{0: [15, 17, 16, 88, 1037], 1: [20, 110, 205, 524, 72], 2: [], 3: []}
 
-	>>> for _ in repeat(None, 15): _ = run_round(monkeys)
+	>>> for _ in repeat(None, 15): _ = run_round(monkeys, lambda worry_level: worry_level // 3)
 	>>> get_items(monkeys)
 	{0: [10, 12, 14, 26, 34], 1: [245, 93, 53, 199, 115], 2: [], 3: []}
 	'''
 	for monkey in monkeys:
-		for worry_level, target_monkey in monkey.run_turn():
+		for worry_level, target_monkey in monkey.run_turn(relief_action):
 			monkeys[target_monkey].add_item(worry_level)
 
 	return monkeys
