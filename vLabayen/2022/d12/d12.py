@@ -10,7 +10,7 @@ def read_file(file: str) -> HeightMap:
 
 def p1(args):
 	hmap = read_file(args.file)
-	path_len = hmap.find_path_lenght()
+	path_len = hmap.find_path_lenght(hmap.starting_location, hmap.best_signal_location)
 	print(path_len)
 
 def p2(args):

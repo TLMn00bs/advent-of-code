@@ -70,7 +70,7 @@ class Location:
 @dataclass
 class HeightMap:
 	locations: typing.Dict[TPosition, Location]
-	current_location: Location
+	starting_location: Location
 	best_signal_location: Location
 
 	@staticmethod
@@ -87,9 +87,9 @@ class HeightMap:
 		>>> len(hm.locations)
 		40
 
-		>>> hm.current_location.position, hm.current_location.height
+		>>> hm.starting_location.position, hm.starting_location.height
 		((0, 0), 1)
-		>>> [n.position for n in hm.current_location.reachable_neighbours]
+		>>> [n.position for n in hm.starting_location.reachable_neighbours]
 		[(1, 0), (0, 1)]
 
 		>>> hm.best_signal_location.position, hm.best_signal_location.height
@@ -100,7 +100,7 @@ class HeightMap:
 		>>> [n.position for n in hm.locations[(1, 2)].reachable_neighbours]
 		[(0, 2), (2, 2), (1, 1)]
 		'''
-		current_location: Location = None
+		starting_location: Location = None
 		best_signal_location: Location = None
 		locations: typing.Dict[TPosition, Location] = {}
 
@@ -109,7 +109,7 @@ class HeightMap:
 			location = Location(position, char_to_height(c))
 			locations[position] = location
 
-			if c == 'S': current_location = location
+			if c == 'S': starting_location = location
 			if c == 'E': best_signal_location = location
 
 		existing_positions = set(locations.keys())
@@ -119,14 +119,18 @@ class HeightMap:
 
 		return HeightMap(
 			locations = locations,
-			current_location = current_location,
+			starting_location = starting_location,
 			best_signal_location = best_signal_location
 		)
 
-	def find_path_lenght(self) -> int:
-		self.current_location.has_been_visited = True
+	def find_path_lenght(self, start: Location, end: Location) -> int:
+		# Ensure no location is marked as visited
+		for location in self.locations.values():
+			location.has_been_visited = False
 
-		locations_at_current_step = [self.current_location]
+		start.has_been_visited = True
+		locations_at_current_step = [start]
+
 		for step in count(1):
 			locations_at_next_step = []
 			for location in locations_at_current_step:
@@ -138,7 +142,7 @@ class HeightMap:
 					neightbour.has_been_visited = True
 					locations_at_next_step.append(neightbour)
 
-			if self.best_signal_location in locations_at_next_step:
+			if end in locations_at_next_step:
 				return step
 
 			locations_at_current_step = locations_at_next_step
