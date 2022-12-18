@@ -1,6 +1,7 @@
 #!/bin/python3
 from domain import *
 import logging
+import math
 
 def read_file(file: str) -> HeightMap:
 	with open(file, 'r') as f:
@@ -15,6 +16,19 @@ def p1(args):
 
 def p2(args):
 	hmap = read_file(args.file)
+	possible_starting_locations = [location for location in hmap.locations.values() if location.height == 1]
+
+	min_path_len = math.inf
+	for i, location in enumerate(possible_starting_locations):
+		logging.debug(f'Computing path for starting location {i}: {location}')
+		path_len = hmap.find_path_lenght(location, hmap.best_signal_location)
+
+		if path_len != None:
+			min_path_len = min(min_path_len, path_len)
+
+	print(min_path_len)
+
+
 
 if __name__ == '__main__':
 	import argparse

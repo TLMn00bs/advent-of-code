@@ -123,7 +123,7 @@ class HeightMap:
 			best_signal_location = best_signal_location
 		)
 
-	def find_path_lenght(self, start: Location, end: Location) -> int:
+	def find_path_lenght(self, start: Location, end: Location) -> typing.Union[int, None]:
 		# Ensure no location is marked as visited
 		for location in self.locations.values():
 			location.has_been_visited = False
@@ -144,6 +144,10 @@ class HeightMap:
 
 			if end in locations_at_next_step:
 				return step
+
+			if len(locations_at_next_step) == 0:
+				logging.debug(f'Cannot reach {end} from {start}')
+				return None
 
 			locations_at_current_step = locations_at_next_step
 
