@@ -93,7 +93,10 @@ class Cave:
 				rocks.update(get_rocks_in_path(start, end))
 
 		void_level = max(y for x, y in rocks)
-		return Cave(rocks, void_level)
+		return Cave(rocks, void_level + 2)
+
+	def add_path(self, start: TPosition, end: TPosition):
+		self.rocks.update(get_rocks_in_path(start, end))
 
 	def add_grain(self):
 		grain = SandGrain(self.sand_origin)

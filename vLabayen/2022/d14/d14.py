@@ -19,8 +19,20 @@ def p1(args):
 	print(len(cave.sand_grains))
 
 def p2(args):
-	_ = read_file(args.file)
+	cave = read_file(args.file)
 
+	# The further a grain can go is in diagonal from the source to each side
+	# to the floor level
+	floor_level = max(y for x, y in cave.rocks) + 2
+	origin_x, origin_y = cave.sand_origin
+	floor_start_x = origin_x - (floor_level - origin_y + 1)
+	floor_end_x   = origin_x + (floor_level - origin_y + 1)
+	cave.add_path((floor_start_x, floor_level), (floor_end_x, floor_level))
+
+	while (cave.sand_origin not in cave.sand_grains):
+		cave.add_grain()
+
+	print(len(cave.sand_grains))
 
 if __name__ == '__main__':
 	import argparse
