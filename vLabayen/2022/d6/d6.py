@@ -1,25 +1,23 @@
 #!/bin/python3
 from domain import *
-import logging
 
-def read_file(file: str):
+def read_file(file):
 	with open(file, 'r') as f:
-		pass
+		return f.read().strip()
 
 def p1(args):
-	_ = read_file(args.file)
+	buffer = read_file(args.file)
+	print(find_marker(buffer, window_size=4))
 
 def p2(args):
-	_ = read_file(args.file)
+	buffer = read_file(args.file)
+	print(find_marker(buffer, window_size=14))
 
 if __name__ == '__main__':
 	import argparse
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-f', '--file', type=str, default='input.txt')
-	parser.add_argument('-v', '--verbose', type=str, choices={'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}, default='WARNING')
 	args = parser.parse_args()
-
-	logging.basicConfig(level=args.verbose)
 
 	p1(args)
 	p2(args)

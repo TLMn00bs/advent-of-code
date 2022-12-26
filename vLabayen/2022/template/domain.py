@@ -1,3 +1,7 @@
+import typing
+import logging
+
 if __name__ == '__main__':
 	import doctest
-	doctest.testmod()
+	logging.basicConfig(level=logging.DEBUG)
+	doctest.testmod(optionflags=doctest.ELLIPSIS)
