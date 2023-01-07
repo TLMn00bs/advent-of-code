@@ -1,40 +1,71 @@
 #!/bin/python3
 from domain import *
 import logging
+from collections import deque
 
 def read_file(file: str):
 	with open(file, 'r') as f:
 		lines = [line.strip() for line in f]
 	
-	return parse_tunnels_layout(lines)
-
-def p0(args):
-	w = Wrapper('example.txt', 'AA', 30)
-	choices = ['DD', 'BB', 'JJ', 'HH', 'EE', 'CC']
-
-	for i in range(len(choices)):
-		c = choices[:i+1]
-		up_upper_limit = w.get_upper_limit(c, variant='up')
-		down_upper_limit = w.get_upper_limit(c, variant='down')
-		logging.debug(f'{up_upper_limit} >= {down_upper_limit} >= ?: {c}')
+	layout = parse_tunnels_layout(lines)
+	distance_map = {valve: get_distances_from(valve, layout) for valve in layout.keys()}
+	flow_rates = {valve: d['flow_rate'] for valve, d in layout.items() if d['flow_rate'] > 0}
+	return distance_map, flow_rates
 
 def p1(args):
-	w = Wrapper(args.file, 'AA', 30)
-	num_valves = len(list(w.valves()))
+	distance_map, flow_rates = read_file(args.file)
 
-	lower_limit = w.get_lower_limit()
-	logging.info(f'{lower_limit=}')
+	valves = list(sorted(flow_rates.keys()))
+	
+	lower_limit = 0
+	available_valves = set(valves)
+	path = deque([{
+		'valve': 'AA',
+		'time': 30,
+		'released_pressure': 0,
+		'upper_limit': get_remaining_pressure('AA', 30, valves, distance_map, flow_rates),
+		'options': deque(valves)
+	}])
 
-	required_choices = [[valve] for valve in w.valves()]
-	for i in range(num_valves - 1):
-		next_choices = []
-		for choices in required_choices:
-			next_choices += [opt for opt in w.get_choices_options(choices, lower_limit)]
+	while len(path[0]['options']) > 0:
+		while len(path[-1]['options']) > 0:
+			logging.debug(f"{' - '.join(step['valve'] for step in path)} -> {set(path[-1]['options'])}")
 
-		required_choices = next_choices
-		logging.debug(f'{len(required_choices)=}')
+			prev = path[-1]
+			valve = prev['options'].popleft()
 
-	print(max(w.get_released_pressure(c) for c in required_choices))
+			time = prev['time'] - distance_map[prev['valve']][valve] - 1
+			if time < 0:
+				continue
+
+			released_pressure = prev['released_pressure'] + (flow_rates[valve] * time)
+			if released_pressure > lower_limit:
+				lower_limit = released_pressure
+				logging.info(f"{released_pressure}: {' - '.join(step['valve'] for step in path)} - {valve}")
+
+			available_valves.remove(valve)
+			if len(available_valves) == 0:
+				available_valves.add(valve)
+				break
+
+			upper_limit = released_pressure + get_remaining_pressure(valve, time, available_valves, distance_map, flow_rates)
+
+			if upper_limit < lower_limit:
+				available_valves.add(valve)
+				continue
+
+			path.append({
+				'valve': valve,
+				'time': time,
+				'released_pressure': released_pressure,
+				'upper_limit': upper_limit,
+				'options': deque(available_valves)
+			})
+
+		prev = path.pop()
+		available_valves.add(prev['valve'])
+
+	print(lower_limit)
 
 def p2(args):
 	_ = read_file(args.file)
@@ -46,7 +77,7 @@ if __name__ == '__main__':
 	parser.add_argument('-v', '--verbose', type=str, choices={'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}, default='WARNING')
 	args = parser.parse_args()
 
-	logging.basicConfig(level=args.verbose)
+	logging.basicConfig(level=args.verbose, format='%(message)s')
 
 	# p0(args)
 	p1(args)

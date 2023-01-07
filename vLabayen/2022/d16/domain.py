@@ -4,11 +4,7 @@ import logging
 import re
 from ndt.window_iterator import iter_window
 
-class Valve(typing.TypedDict):
-	flow_rate: int
-	connected_nodes: typing.Set[str]
-
-TunnelLayout = typing.Dict[str, Valve]
+TunnelLayout = typing.Dict[str, dict]
 
 rgx = re.compile('Valve ([A-Z]+) has flow rate=([0-9]+); tunnels? leads? to valves? (.*)')
 def parse_tunnels_layout(lines: typing.List[str]) -> TunnelLayout:
@@ -52,140 +48,22 @@ def get_distances_from(src: str, layout: TunnelLayout) -> typing.Dict[str, int]:
 	del distances[src]
 	return distances
 
-def get_available_pressure(flow_rate: int, distance: int, time: int) -> int:
-	''' Get the maximun pressure that can be released '''
-	p = flow_rate * (time - distance - 1)
-	if p > 0: return p
-	return 0
+def get_upper_limit(path: Deque[dict], distance_map: Dict[str, Dict[str, int]], flow_rates: Dict[str, int]) -> int:
+	last_valve = path[-1]['valve']
+	released_pressure = path[-1]['released_pressure']
+	remaining_time = path[-1]['time']
 
-def get_remaining_pressure(valves: typing.List[typing.Tuple[int, int]], time: int) -> int:
-	''' Get the maximum pressure that can be released '''
-	score = 0
-	for flow_rate, distance in valves:
-		p = flow_rate * (time - distance - 1)
-		if p > 0: score += p	
-	return score
-
-def get_valve_score(src: str, dst: str, time: int,
-	distance_map: typing.Dict[str, typing.Dict[str, int]],
-	flow_rates: typing.Dict[str, int],
-	remaining_valves: typing.Set[str]
-) -> int:
-	''' Get the score for remaining valve'''
-	released_pressure = get_available_pressure(
-		flow_rates[dst],
-		distance_map[src][dst],
-		time
-	)
-
-	next_valves = remaining_valves.difference([dst])
-	remaining_pressure = get_remaining_pressure(
-		[(flow_rates[next_dst], distance_map[dst][next_dst]) for next_dst in next_valves],
-		time - distance_map[src][dst] - 1
-	)
+	open_valves = set(step['valve'] for step in path)
+	remaining_valves = (valve for valve in flow_rates.keys() if valve not in open_valves)
+	remaining_pressure = sum(flow_rates[valve] * (remaining_time - distance_map[last_valve][valve] - 1) for valve in remaining_valves)
 
 	return released_pressure + remaining_pressure
 
-def get_open_times(startingPosition: str, maxTime: int,
-	choices: List[str],
-	distancesMap: Dict[str, Dict[str, int]]) -> Iterable[int]:
-	''' Get the times when each valve will be opened '''
+def get_remaining_pressure(starting_valve: str, remaining_time: int,
+	remaining_valves: Iterable[str], distance_map: Dict[str, Dict[str, int]], flow_rates: Dict[str, int]) -> int:
 
-	path = [startingPosition] + choices
-	distances = [distancesMap[src][dst] for src, dst in iter_window(path, n=2)]
-
-	acc_time = 0
-	for d in distances:
-		incr = d + 1
-		if acc_time + incr >= maxTime: return
-
-		acc_time += incr
-		yield acc_time
-
-
-def get_released_pressure(choices: List[str], maxTime: int,
-	open_times: List[int],
-	flowRates: Dict[str, int]) -> int:
-	''' Get the total released pressure when following a given order '''
-
-	return sum(flowRates[valve] * (maxTime - time) for valve, time in zip(choices, open_times))
-
-def get_upper_limit(choices: List[str], maxTime: int,
-	open_times: List[int],
-	distancesMap: Dict[str, Dict[str, int]],
-	flowRates: Dict[str, int],
-	variant: str = 'up'
-	) -> int:
-	''' Get an upper limit for the released pressure with unfinished choices '''
-
-	already_released = get_released_pressure(choices, maxTime, open_times, flowRates)
-	last_position = choices[-1]
-	spent_time = open_times[-1]
-	remaining_time = maxTime - spent_time
-	remaining_valves = [valve for valve in flowRates if valve not in choices]
-
-	if variant == 'up':
-		max_pressure = lambda valve: flowRates[valve] * (remaining_time - distancesMap[last_position][valve] - 1)
-		max_remaning_pressure = sum(max_pressure(valve) for valve in remaining_valves)
-		return already_released + max_remaning_pressure
-
-	if variant == 'down':
-		max_pressure = lambda valve, idx: flowRates[valve] * (remaining_time - distancesMap[last_position][valve] - 1 - idx)
-		sorted_valves = sorted(remaining_valves, key = lambda valve: flowRates[valve], reverse=True)
-		max_remaning_pressure = sum(max_pressure(valve, idx) for idx, valve in enumerate(sorted_valves))
-		return already_released + max_remaning_pressure
-
-
-class Wrapper:
-	def __init__(self, file: str, startingPosition: str, maxTime: int):
-		self.startingPosition = startingPosition
-		self.maxTime = maxTime
-
-		with open(file, 'r') as f:
-			self.layout = parse_tunnels_layout([line.strip() for line in f])
-
-		self.distance_map = {valve: get_distances_from(valve, self.layout) for valve in self.layout.keys()}
-		self.flow_rates = {valve: d['flow_rate'] for valve, d in self.layout.items() if d['flow_rate'] > 0}
-
-		self.max_pressure = 0
-
-	def valves(self) -> Iterable[str]: return self.flow_rates.keys()
-	def flow_rate(self, valve) -> int: return self.flow_rates[valve]
-
-	def get_released_pressure(self, choices: List[str]) -> int:
-		# Same here que abajo
-		open_times = list(get_open_times(self.startingPosition, self.maxTime, choices, self.distance_map))
-		return get_released_pressure(choices, self.maxTime, open_times, self.flow_rates)
-
-	def get_upper_limit(self, choices: List[str], **kwargs) -> int:
-		# TODO: De alguna forma tiene que poder acelerarse todo cacheando el recorrido hasta la nueva valvula.
-		# Si tengo el path: [XX, YY, ZZ], cuando mire los posibles siguientes pasos, debería poder cachear
-		# el computo de XX, YY, ZZ.
-		open_times = list(get_open_times(self.startingPosition, self.maxTime, choices, self.distance_map))
-		return get_upper_limit(choices, self.maxTime, open_times, self.distance_map, self.flow_rates, **kwargs)
-
-	def get_choices_options(self, required_choices: List[str], lower_limit: int):
-		used_valves = set(required_choices)
-		for valve in self.valves():
-			if valve in used_valves: continue
-
-			choices = required_choices + [valve]
-			if self.get_upper_limit(choices) >= lower_limit:
-				yield choices
-
-	def get_lower_limit(self):
-		scores = {valve: self.get_upper_limit([valve], variant='up') for valve in self.valves()}
-		firstChoice = max(self.valves(), key = lambda valve: scores[valve])
-		choices = [firstChoice]
-		remaining_valves = set(valve for valve in self.valves() if valve != firstChoice)
-
-		while len(remaining_valves) > 0:
-			scores = {valve: self.get_upper_limit(choices + [valve], variant='up') for valve in remaining_valves}
-			nextChoice = max(scores.keys(), key = lambda valve: scores[valve])
-			choices.append(nextChoice)
-			remaining_valves.remove(nextChoice)
-
-		return self.get_released_pressure(choices)
+	max_pressure = lambda valve: max(0, remaining_time - distance_map[starting_valve][valve] - 1)
+	return sum(flow_rates[valve] * max_pressure(valve) for valve in remaining_valves)
 
 if __name__ == '__main__':
 	import doctest
@@ -229,50 +107,6 @@ if __name__ == '__main__':
 		def test_get_distances_from(self):
 			distances = get_distances_from('AA', TestDomain.layout)
 			self.assertDictEqual(distances, TestDomain.distances_from_AA)
-
-		def test_get_available_pressure(self):
-			p = get_available_pressure(20, 1, 30)
-			self.assertEqual(p, 28 * 20)
-
-		def test_get_remaining_pressure(self):
-			distances = get_distances_from('DD', TestDomain.layout)
-			t = 30 - TestDomain.distances_from_AA['DD'] - 1
-
-			p = get_remaining_pressure(
-				[(TestDomain.layout[dst]['flow_rate'], d) for dst, d in distances.items()],
-				t
-			)
-			self.assertEqual(p, sum([
-				13 * (t - distances['BB'] - 1),
-				2  * (t - distances['CC'] - 1),
-				3  * (t - distances['EE'] - 1),
-				22 * (t - distances['HH'] - 1),
-				21 * (t - distances['JJ'] - 1),
-			]))
-
-		def test_get_released_pressure(self):
-			startingPosition = 'AA'
-			maxTime = 30
-			choices = ['DD', 'BB', 'JJ', 'HH', 'EE', 'CC']
-
-			distancesMap = {valve: get_distances_from(valve, self.layout) for valve in self.layout}
-			flowRates: Dict[str, int] = {valve: d['flow_rate'] for valve, d in self.layout.items() if d['flow_rate'] > 0}
-
-			openTimes = list(get_open_times(startingPosition, maxTime, choices, distancesMap))
-			rp = get_released_pressure(choices, maxTime, openTimes, flowRates)
-			self.assertEqual(rp, 1651)
-
-		def test_get_upper_limit(self):
-			startingPosition = 'AA'
-			maxTime = 30
-			choices = ['DD', 'BB', 'HH']
-
-			distancesMap = {valve: get_distances_from(valve, self.layout) for valve in self.layout}
-			flowRates: Dict[str, int] = {valve: d['flow_rate'] for valve, d in self.layout.items() if d['flow_rate'] > 0}
-
-			openTimes = list(get_open_times(startingPosition, maxTime, choices, distancesMap))
-			rp = get_upper_limit(choices, maxTime, openTimes, distancesMap, flowRates)
-			self.assertEqual(rp, 1557)
 
 
 	logging.info(f'Running doctests')
