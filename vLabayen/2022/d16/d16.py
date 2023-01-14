@@ -1,7 +1,6 @@
 #!/bin/python3
 from domain import *
 import logging
-from collections import deque
 
 def read_file(file: str):
 	with open(file, 'r') as f:
@@ -13,72 +12,67 @@ def read_file(file: str):
 	return distance_map, flow_rates
 
 def p1(args):
+	starting_valve = 'AA'
+	max_time = 30
 	distance_map, flow_rates = read_file(args.file)
+	valves = frozenset(sorted(flow_rates.keys()))
 
-	valves = list(sorted(flow_rates.keys()))
-	
-	lower_limit = 0
-	available_valves = set(valves)
-	path = deque([{
-		'valve': 'AA',
-		'time': 30,
-		'released_pressure': 0,
-		'upper_limit': get_remaining_pressure('AA', 30, valves, distance_map, flow_rates),
-		'options': deque(valves)
-	}])
+	max_pressure, path = get_max_pressure(starting_valve, max_time,
+		distance_map=distance_map,
+		flow_rates=flow_rates,
+		valves=valves,
+		compute_upper_limit=single_path_upper_limit
+	)
 
-	while len(path[0]['options']) > 0:
-		while len(path[-1]['options']) > 0:
-			logging.debug(f"{' - '.join(step['valve'] for step in path)} -> {set(path[-1]['options'])}")
-
-			prev = path[-1]
-			valve = prev['options'].popleft()
-
-			time = prev['time'] - distance_map[prev['valve']][valve] - 1
-			if time < 0:
-				continue
-
-			released_pressure = prev['released_pressure'] + (flow_rates[valve] * time)
-			if released_pressure > lower_limit:
-				lower_limit = released_pressure
-				logging.info(f"{released_pressure}: {' - '.join(step['valve'] for step in path)} - {valve}")
-
-			available_valves.remove(valve)
-			if len(available_valves) == 0:
-				available_valves.add(valve)
-				break
-
-			upper_limit = released_pressure + get_remaining_pressure(valve, time, available_valves, distance_map, flow_rates)
-
-			if upper_limit < lower_limit:
-				available_valves.add(valve)
-				continue
-
-			path.append({
-				'valve': valve,
-				'time': time,
-				'released_pressure': released_pressure,
-				'upper_limit': upper_limit,
-				'options': deque(available_valves)
-			})
-
-		prev = path.pop()
-		available_valves.add(prev['valve'])
-
-	print(lower_limit)
+	logging.info(f'Best path: {path}')
+	print(max_pressure)
 
 def p2(args):
-	_ = read_file(args.file)
+	starting_valve = 'AA'
+	max_time = 26
+	distance_map, flow_rates = read_file(args.file)
+	valves = frozenset(sorted(flow_rates.keys()))
+
+	max_pressure, path = get_max_pressure(starting_valve, max_time,
+		distance_map=distance_map,
+		flow_rates=flow_rates,
+		valves=valves,
+		compute_upper_limit=lambda *args: double_path_upper_limit(*args, starting_valve=starting_valve, maxTime=max_time)
+	)
+
+	available_valves = valves.difference(path)
+	_, elephant_path = get_max_pressure(starting_valve, max_time,
+		distance_map=distance_map,
+		flow_rates=flow_rates,
+		valves=available_valves,
+		compute_upper_limit=single_path_upper_limit
+	)
+
+	logging.info(f'Best path: {path} - {elephant_path}')
+	print(max_pressure)
 
 if __name__ == '__main__':
 	import argparse
+	import time
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-f', '--file', type=str, default='input.txt')
 	parser.add_argument('-v', '--verbose', type=str, choices={'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}, default='WARNING')
+	parser.add_argument('-t', '--time', default=False, action='store_true')
 	args = parser.parse_args()
 
 	logging.basicConfig(level=args.verbose, format='%(message)s')
 
-	# p0(args)
+	start = time.perf_counter()
+	# 1651: ['AA', 'DD', 'BB', 'JJ', 'HH', 'EE', 'CC']
 	p1(args)
-	# p2(args)
+	elapsed_p1 = time.perf_counter() - start
+
+	start = time.perf_counter()
+	# 1707: ['AA, 'JJ', 'BB', 'CC'], ['AA', 'DD', 'HH', 'EE']
+	p2(args)
+	elapsed_p2 = time.perf_counter() - start
+
+	if args.time:
+		print(f'Elapsed p1: {elapsed_p1}s')
+		print(f'Elapsed p2: {elapsed_p2}s')
