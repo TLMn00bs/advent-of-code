@@ -15,7 +15,7 @@ def p1(args):
 	starting_valve = 'AA'
 	max_time = 30
 	distance_map, flow_rates = read_file(args.file)
-	valves = set(sorted(flow_rates.keys()))
+	valves = frozenset(sorted(flow_rates.keys()))
 
 	max_pressure, path = get_max_pressure(starting_valve, max_time,
 		distance_map=distance_map,
@@ -31,7 +31,7 @@ def p2(args):
 	starting_valve = 'AA'
 	max_time = 26
 	distance_map, flow_rates = read_file(args.file)
-	valves = set(sorted(flow_rates.keys()))
+	valves = frozenset(sorted(flow_rates.keys()))
 
 	max_pressure, path = get_max_pressure(starting_valve, max_time,
 		distance_map=distance_map,
@@ -40,7 +40,7 @@ def p2(args):
 		compute_upper_limit=lambda *args: double_path_upper_limit(*args, starting_valve=starting_valve, maxTime=max_time)
 	)
 
-	available_valves = valves.difference(set(path))
+	available_valves = valves.difference(path)
 	_, elephant_path = get_max_pressure(starting_valve, max_time,
 		distance_map=distance_map,
 		flow_rates=flow_rates,
@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
 	start = time.perf_counter()
 	# 1651: ['AA', 'DD', 'BB', 'JJ', 'HH', 'EE', 'CC']
-	# p1(args)
+	p1(args)
 	elapsed_p1 = time.perf_counter() - start
 
 	start = time.perf_counter()

@@ -57,33 +57,55 @@ def single_path_upper_limit(released_pressure: int, next_valve: str, remaining_t
 	remaining_valves: Iterable[str],
 	distance_map: Dict[str, Dict[str, int]],
 	flow_rates: Dict[str, int]
-	) -> int:
+	) -> Tuple[int, int]:
 	
 	upper_limit = released_pressure + get_remaining_pressure(next_valve, remaining_time, remaining_valves, distance_map, flow_rates)
 	return released_pressure, upper_limit
 
 def double_path_upper_limit(released_pressure: int, next_valve: str, remaining_time: int,
-	remaining_valves: Set[str],
+	remaining_valves: Iterable[str],
 	distance_map: Dict[str, Dict[str, int]],
 	flow_rates: Dict[str, int],
 	starting_valve: str, maxTime: int
-	) -> int:
+	) -> Tuple[int, int]:
 
 	_, single_upper_limit = single_path_upper_limit(released_pressure, next_valve, remaining_time, remaining_valves, distance_map, flow_rates)
-	second_path_max_pressure, _ = get_max_pressure(starting_valve, maxTime, distance_map, flow_rates, remaining_valves, compute_upper_limit=single_path_upper_limit)
+	second_path_max_pressure, _ = get_max_pressure(starting_valve, maxTime, distance_map, flow_rates, valves=remaining_valves, compute_upper_limit=single_path_upper_limit, log=False)
 	return released_pressure + second_path_max_pressure, single_upper_limit + second_path_max_pressure
 
+def path_cache(fnc):
+	cache: Dict[FrozenSet[str], Tuple[int, Tuple[str]]] = {}
+
+	def inner(*args, **kwargs) -> Tuple[int, Tuple[str]]:
+		input_valves: Set[str] = kwargs['valves']
+		for valves, (pressure, path) in cache.items():
+			if not input_valves.issubset(valves):
+				continue
+
+			if not input_valves.issuperset(path):
+				continue
+
+			return pressure, path
+		
+		pressure, path = fnc(*args, **kwargs)
+		cache[frozenset(input_valves)] = (pressure, path)
+		return pressure, path
+
+	return inner
+
+@path_cache
 def get_max_pressure(starting_valve: str, maxTime: int,
 	distance_map: Dict[str, Dict[str, int]],
 	flow_rates: Dict[str, int],
 	valves: Set[str],
-	compute_upper_limit: Callable[[int, str, int, Iterable[str], Dict[str, Dict[str, int]], Dict[str, int]], Tuple[int, int]],
-	) -> int:
+	compute_upper_limit: Callable[[int, str, int, FrozenSet[str], Dict[str, Dict[str, int]], Dict[str, int]], Tuple[int, int]],
+	log: bool = True
+	) -> Tuple[int, Tuple[str]]:
 	
 	max_released_pressure = 0
 	best_path = []
 
-	available_valves = valves.copy()
+	available_valves = set(valves)
 	path = deque([{
 		'valve': starting_valve,
 		'time': maxTime,
@@ -107,7 +129,7 @@ def get_max_pressure(starting_valve: str, maxTime: int,
 			if max_pressure > max_released_pressure:
 				max_released_pressure = max_pressure
 				best_path = [step['valve'] for step in path] + [next_valve]
-				logging.debug(f"{max_released_pressure}: {' - '.join(step['valve'] for step in path)} - {next_valve}")
+				if log: logging.debug(f"{max_released_pressure}: {' - '.join(step['valve'] for step in path)} - {next_valve}")
 
 			if len(available_valves) == 0:
 				available_valves.add(next_valve)
@@ -127,9 +149,7 @@ def get_max_pressure(starting_valve: str, maxTime: int,
 		prev_step = path.pop()
 		available_valves.add(prev_step['valve'])
 
-	logging.info(best_path)
-	# logging.info(f'{valves=} --> ({max_released_pressure}): {best_path=}')
-	return max_released_pressure, best_path
+	return max_released_pressure, tuple(best_path)
 
 
 def get_released_pressure(time: int, path: List[str], distance_map: Dict[str, Dict[str, int]], flow_rates: Dict[str, int]) -> int:
