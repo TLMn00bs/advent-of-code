@@ -62,8 +62,14 @@ def get_upper_limit(path: Deque[dict], distance_map: Dict[str, Dict[str, int]], 
 def get_remaining_pressure(starting_valve: str, remaining_time: int,
 	remaining_valves: Iterable[str], distance_map: Dict[str, Dict[str, int]], flow_rates: Dict[str, int]) -> int:
 
-	max_pressure = lambda valve: max(0, remaining_time - distance_map[starting_valve][valve] - 1)
-	return sum(flow_rates[valve] * max_pressure(valve) for valve in remaining_valves)
+	max_time_open = lambda valve: max(0, remaining_time - distance_map[starting_valve][valve] - 1)
+	return sum(flow_rates[valve] * max_time_open(valve) for valve in remaining_valves)
+
+def get_multipath_remaining_pressure(states: List[Tuple[str, int]],
+	remaining_valves: Iterable[str], distance_map: Dict[str, Dict[str, int]], flow_rates: Dict[str, int]) -> int:
+
+	max_time_open = lambda starting_valve, time, target_valve: max(0, time - distance_map[starting_valve][target_valve] - 1)
+	return sum(flow_rates[valve] * max(max_time_open(starting_valve, time, valve) for starting_valve, time in states) for valve in remaining_valves)
 
 if __name__ == '__main__':
 	import doctest
