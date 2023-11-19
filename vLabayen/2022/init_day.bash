@@ -20,5 +20,5 @@ mv template.py $dx.py
 if [ $# == 2 ]; then
 	# dx is, for example, d5, while the url must be just 5
 	dx_url="${dx:1}"	# Remove first character
-	curl --cookie "session=$2" "https://adventofcode.com/$(date +%Y)/day/${dx_url}/input" > input.txt
+	curl --cookie "session=$2" "https://adventofcode.com/2022/day/${dx_url}/input" > input.txt
 fi
