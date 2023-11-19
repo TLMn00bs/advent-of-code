@@ -206,5 +206,6 @@ def falling_rocks(n: int, start_x: int, start_y: Callable[[], int]) -> Iterable[
 			yield FifthShape(start_x, start_y())
 
 	rocks = gen()
+	if n == 0: return gen()
 	for _ in range(n):
 		yield next(rocks)

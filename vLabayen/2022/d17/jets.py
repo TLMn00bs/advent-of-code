@@ -12,5 +12,5 @@ def read_file(file: str) -> List[Jet]:
 def jets_gen(file: str):
 	jets = read_file(file)
 	while True:
-		for jet in jets: yield jet
+		for i, jet in enumerate(jets): yield i, jet
 
