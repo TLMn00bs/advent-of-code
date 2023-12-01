@@ -47,7 +47,7 @@ EOF
 
 curl --cookie "session=$COOKIE" -XGET https://adventofcode.com/2022/leaderboard/private/view/1065002.json 2>/dev/null > leaderboard2022.json
 
-data=$(jq '.members | flatten | sort_by(.stars) | reverse | .[] | {name: .name, stars: .stars}' leaderboard2022.json | sed 's/Jesús Arellano/jesusarell/' | sed 's/0rb3/i97orbegozo/')
+data=$(jq '.members | flatten | sort_by(.stars) | reverse | .[] | {name: .name, stars: .stars}' leaderboard2022.json | sed 's/Uri/adrian-uri/' | sed 's/Rubén Maté/rubenmate/'  | sed 's/Jesús Arellano/jesusarell/' | sed 's/0rb3/i97orbegozo/')
 
 echo $data | jq -j '.name," ",.stars,"\n"' | \
 awk 'BEGIN{
@@ -75,7 +75,7 @@ EOF
 
 curl --cookie "session=$COOKIE" -XGET https://adventofcode.com/2021/leaderboard/private/view/1065002.json 2>/dev/null > leaderboard2021.json
 
-data=$(jq '.members | flatten | sort_by(.stars) | reverse | .[] | {name: .name, stars: .stars}' leaderboard2021.json | sed 's/Jesús Arellano/jesusarell/' | sed 's/0rb3/i97orbegozo/')
+data=$(jq '.members | flatten | sort_by(.stars) | reverse | .[] | {name: .name, stars: .stars}' leaderboard2021.json | sed 's/Uri/adrian-uri/' | sed 's/Rubén Maté/rubenmate/'  | sed 's/Jesús Arellano/jesusarell/' | sed 's/0rb3/i97orbegozo/')
 
 echo $data | jq -j '.name," ",.stars,"\n"' | \
 awk 'BEGIN{
@@ -104,7 +104,7 @@ EOF
 
 curl --cookie "session=$COOKIE" -XGET https://adventofcode.com/2020/leaderboard/private/view/1065002.json 2>/dev/null > leaderboard2020.json
 
-data=$(jq '.members | flatten | sort_by(.stars) | reverse | .[] | {name: .name, stars: .stars}' leaderboard2020.json | sed 's/Jesús Arellano/jesusarell/' | sed 's/0rb3/i97orbegozo/')
+data=$(jq '.members | flatten | sort_by(.stars) | reverse | .[] | {name: .name, stars: .stars}' leaderboard2020.json | sed 's/Uri/adrian-uri/' | sed 's/Rubén Maté/rubenmate/'  | sed 's/Jesús Arellano/jesusarell/' | sed 's/0rb3/i97orbegozo/')
 
 # fix order:
 data=$(echo $data | sed 's/{ "name": "lassa97", "stars": 50 } { "name": "vLabayen", "stars": 50 }/{ "name": "vLabayen", "stars": 50 } { "name": "lassa97", "stars": 50 }/')
