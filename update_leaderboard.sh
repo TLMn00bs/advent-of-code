@@ -28,7 +28,7 @@ awk 'BEGIN{
         langs["jesusarell"] ="*"
         langs["i97orbegozo"]="*"
         langs["rubenmate"]  ="*"
-        langs["Adrian-uri"] ="*"
+        langs["Adrian-Uri"] ="*"
         langs["clarriu97"]  ="*"
     }
     {print" | [@"$1"](https://github.com/"$1")| ["langs[$1]"](https://github.com/TLMn00bs/advent-of-code/tree/master/"$1") | "$2" |"}' >> README.md
