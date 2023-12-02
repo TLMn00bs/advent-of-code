@@ -128,7 +128,7 @@ def build_options(resources: Resources, production: Resources, blueprint: Bluepr
 
 	# If we can build a geode robot, just do it
 	if blueprint.is_buildable(resources, BuildOption.GEODE):
-		yield BuildOption.GEODE, blueprint.robot_costs[BuildOption.GEODE], Resources(geode=1)
+		yield BuildOption.GEODE, blueprint.geode, Resources(geode=1)
 		return
 
 
@@ -143,13 +143,13 @@ def build_options(resources: Resources, production: Resources, blueprint: Bluepr
 	
 	# Yield every buildable robot, but do not build a robot if it's production is >= greater cost of that resource
 	if BuildOption.OBSIDIAN not in banned_robots and production.obsidian < blueprint.max_costs.obsidian and blueprint.is_buildable(resources, BuildOption.OBSIDIAN):
-		yield BuildOption.OBSIDIAN, blueprint.robot_costs[BuildOption.OBSIDIAN], Resources(obsidian=1)
+		yield BuildOption.OBSIDIAN, blueprint.obsidian, Resources(obsidian=1)
 
 	if BuildOption.CLAY not in banned_robots and production.clay < blueprint.max_costs.clay and blueprint.is_buildable(resources, BuildOption.CLAY):
-		yield BuildOption.CLAY, blueprint.robot_costs[BuildOption.CLAY], Resources(clay=1)
+		yield BuildOption.CLAY, blueprint.clay, Resources(clay=1)
 
 	if BuildOption.ORE not in banned_robots and production.ore < blueprint.max_costs.ore and blueprint.is_buildable(resources, BuildOption.ORE):
-		yield BuildOption.ORE, blueprint.robot_costs[BuildOption.ORE], Resources(ore=1)
+		yield BuildOption.ORE, blueprint.ore, Resources(ore=1)
 
 	yield BuildOption.NOP, Resources(), Resources()
 
