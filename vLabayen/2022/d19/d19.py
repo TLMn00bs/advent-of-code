@@ -98,7 +98,7 @@ def best_collect_time(mineral_amount: int) -> int:
 		remaining -= i
 		if remaining <= 0: return i
 
-	return 0		# Just to make linter shut up
+	raise ValueError(f'Cannot reach this point')
 
 def max_aditional_geode(resources: Resources, production: Resources, blueprint: Blueprint, time: int) -> int:
 	# If we assume we have infinite resources, the max generated geodes will be the triangular number of time - 1
