@@ -29,6 +29,9 @@ class Node:
 
 		raise ValueError(f'No new neightbours')
 
+	def apply_decryption_key(self, key: int) -> None:
+		self.value = self.value * key
+
 def mix(nodes: List[Node]) -> None:
 	for node in nodes:
 		# print([node.get_next(i).value for i in range(len(nodes))])
@@ -76,7 +79,16 @@ def p1(args):
 
 
 def p2(args):
-	_ = read_file(args.file)
+	nodes = read_file(args.file)
+	for node in nodes: node.apply_decryption_key(811589153)
+	for _ in range(10): mix(nodes)
+
+	zero_node = find_zero(nodes)
+	first  = zero_node.get_next(1000).value
+	second = zero_node.get_next(2000).value
+	third  = zero_node.get_next(3000).value
+	print(first + second + third)
+
 
 if __name__ == '__main__':
 	import argparse
