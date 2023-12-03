@@ -4,15 +4,8 @@ from enum import IntEnum, auto
 from itertools import count
 import re
 import logging
+from functools import lru_cache
 
-
-# https://es.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF
-def triangular_number(n: int) -> int:
-	if n <= 0: return 0
-	return n * (n + 1) // 2
-
-# Precompute for all required numbers
-triangular_numbers = {n: triangular_number(n) for n in range(32)}
 
 @define(kw_only=True)
 class Resources:
@@ -75,10 +68,6 @@ class Blueprint:
 			geode    = max(costs.geode    for costs in self.robot_costs.values()),
 		)
 
-	def is_buildable(self, resources: Resources, option: BuildOption) -> bool:
-		if option == BuildOption.NOP: return True
-		return self.robot_costs[option] <= resources
-
 	@staticmethod
 	def from_file(file: str) -> Iterable['Blueprint']:
 		parse_blueprint = re.compile(r'Blueprint (\d+): Each ore robot costs (\d+) ore. Each clay robot costs (\d+) ore. Each obsidian robot costs (\d+) ore and (\d+) clay. Each geode robot costs (\d+) ore and (\d+) obsidian.')
@@ -95,6 +84,13 @@ class Blueprint:
 					geode    = Resources(ore = geode_ore, obsidian = geode_obsidian)
 				)
 
+# https://es.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF
+@lru_cache(maxsize=50)
+def triangular_number(n: int) -> int:
+	if n <= 0: return 0
+	return n * (n + 1) // 2
+
+@lru_cache(maxsize=100)
 def best_collect_time(mineral_amount: int) -> int:
 	''' Compute the best time to collect the given amount of any mineral, assuming a current production of 0 and infinite of the required resources '''
 	remaining = mineral_amount
@@ -111,10 +107,13 @@ def max_aditional_geode(resources: Resources, production: Resources, blueprint: 
 	build_time = 1
 	if production.clay     == 0: build_time += best_collect_time(resources.clay     - blueprint.obsidian.clay)
 	if production.obsidian == 0: build_time += best_collect_time(resources.obsidian - blueprint.geode.obsidian)
-	return triangular_numbers[time - build_time]
+	return triangular_number(time - build_time)
 
 def ensured_resources(resources: Resources, production: Resources, time: int) -> int:
 	return resources.geode + (production.geode * time)
+
+
+def is_buildable(resources: Resources, costs: Resources) -> bool: return costs <= resources
 
 
 def build_options(resources: Resources, production: Resources, blueprint: Blueprint, time: int, choices: List[BuildOption]) -> Iterable[Tuple[BuildOption, Resources, Resources]]:
@@ -127,10 +126,9 @@ def build_options(resources: Resources, production: Resources, blueprint: Bluepr
 		return
 
 	# If we can build a geode robot, just do it
-	if blueprint.is_buildable(resources, BuildOption.GEODE):
+	if is_buildable(resources, blueprint.geode):
 		yield BuildOption.GEODE, blueprint.geode, Resources(geode=1)
 		return
-
 
 	# When a NOPE is generated having the option to build some robots,
 	# those robots should become banned from being built again until something else is built,
@@ -138,17 +136,17 @@ def build_options(resources: Resources, production: Resources, blueprint: Bluepr
 	banned_robots: Set[BuildOption] = set()
 	if len(choices) > 0 and choices[-1] == BuildOption.NOP:
 		prev_resources = resources - production
-		banned_robots = set(robot for robot in blueprint.robot_costs if blueprint.is_buildable(prev_resources, robot))
+		banned_robots = set(robot for robot, costs in blueprint.robot_costs.items() if is_buildable(prev_resources, costs))
 
-	
-	# Yield every buildable robot, but do not build a robot if it's production is >= greater cost of that resource
-	if BuildOption.OBSIDIAN not in banned_robots and production.obsidian < blueprint.max_costs.obsidian and blueprint.is_buildable(resources, BuildOption.OBSIDIAN):
+
+	# Yield every robot that makes sense building
+	if BuildOption.OBSIDIAN not in banned_robots and production.obsidian < blueprint.max_costs.obsidian and is_buildable(resources, blueprint.obsidian):
 		yield BuildOption.OBSIDIAN, blueprint.obsidian, Resources(obsidian=1)
 
-	if BuildOption.CLAY not in banned_robots and production.clay < blueprint.max_costs.clay and blueprint.is_buildable(resources, BuildOption.CLAY):
+	if BuildOption.CLAY not in banned_robots and production.clay < blueprint.max_costs.clay and is_buildable(resources, blueprint.clay):
 		yield BuildOption.CLAY, blueprint.clay, Resources(clay=1)
 
-	if BuildOption.ORE not in banned_robots and production.ore < blueprint.max_costs.ore and blueprint.is_buildable(resources, BuildOption.ORE):
+	if BuildOption.ORE not in banned_robots and production.ore < blueprint.max_costs.ore and is_buildable(resources, blueprint.ore):
 		yield BuildOption.ORE, blueprint.ore, Resources(ore=1)
 
 	yield BuildOption.NOP, Resources(), Resources()
