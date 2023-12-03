@@ -114,7 +114,22 @@ def ensured_resources(resources: Resources, production: Resources, time: int) ->
 
 
 def is_buildable(resources: Resources, costs: Resources) -> bool: return costs <= resources
+def should_build(resource_production: int, max_resource_cost: int, resources: Resources, production: Resources, costs: Resources, choices: List[BuildOption]) -> bool:
+	'''
+	The robot must not have been delayed (when a NOPE is selected having the option to build a robot, that robot should not be built again until something else is built, since there is no point in just delaying it)
+	It must make sense building it (it's production is < greater cost of that resource)
+	It must be buildable (costs <= resources)
+	'''
+	was_delayed = False
+	if len(choices) > 0 and choices[-1] == BuildOption.NOP:
+		prev_resources = resources - production
+		was_delayed = is_buildable(prev_resources, costs)
 
+	return (
+		not was_delayed                             and
+		resource_production < max_resource_cost     and
+		is_buildable(resources, costs)
+	)
 
 def build_options(resources: Resources, production: Resources, blueprint: Blueprint, time: int, choices: List[BuildOption]) -> Iterable[Tuple[BuildOption, Resources, Resources]]:
 	''' Return an iterable with all the available options
@@ -130,25 +145,18 @@ def build_options(resources: Resources, production: Resources, blueprint: Bluepr
 		yield BuildOption.GEODE, blueprint.geode, Resources(geode=1)
 		return
 
-	# When a NOPE is generated having the option to build some robots,
-	# those robots should become banned from being built again until something else is built,
-	# since there is no point in delaying it
-	banned_robots: Set[BuildOption] = set()
-	if len(choices) > 0 and choices[-1] == BuildOption.NOP:
-		prev_resources = resources - production
-		banned_robots = set(robot for robot, costs in blueprint.robot_costs.items() if is_buildable(prev_resources, costs))
-
 
 	# Yield every robot that makes sense building
-	if BuildOption.OBSIDIAN not in banned_robots and production.obsidian < blueprint.max_costs.obsidian and is_buildable(resources, blueprint.obsidian):
+	if should_build(production.obsidian, blueprint.max_costs.obsidian, resources, production, blueprint.obsidian, choices):
 		yield BuildOption.OBSIDIAN, blueprint.obsidian, Resources(obsidian=1)
 
-	if BuildOption.CLAY not in banned_robots and production.clay < blueprint.max_costs.clay and is_buildable(resources, blueprint.clay):
+	if should_build(production.clay, blueprint.max_costs.clay, resources, production, blueprint.clay, choices):
 		yield BuildOption.CLAY, blueprint.clay, Resources(clay=1)
 
-	if BuildOption.ORE not in banned_robots and production.ore < blueprint.max_costs.ore and is_buildable(resources, blueprint.ore):
+	if should_build(production.ore, blueprint.max_costs.ore, resources, production, blueprint.ore, choices):
 		yield BuildOption.ORE, blueprint.ore, Resources(ore=1)
 
+	# Not to build is always an option
 	yield BuildOption.NOP, Resources(), Resources()
 
 
@@ -157,8 +165,14 @@ def compute_largest_number_of_geodes(resources: Resources, production: Resources
 	ensured_geodes = ensured_resources(resources, production, time)
 	upper_limit = ensured_geodes + max_remaining_geodes
 
-	if max_remaining_geodes == 0 or upper_limit <= lower_limit:
+	# No more geodes extra can be obtained, just return whatever we are ensured to get
+	# with the current resources and production
+	if max_remaining_geodes == 0:
 		# print(f'{lower_limit=}, {ensured_geodes=}, {choices=}')
+		return ensured_geodes
+
+	# This branch will not be able to obtain more geodes that we have already gotten in another one
+	if upper_limit <= lower_limit:
 		return ensured_geodes
 
 	highest_geodes = 0
@@ -178,7 +192,7 @@ def compute_largest_number_of_geodes(resources: Resources, production: Resources
 		)
 
 		highest_geodes = max(highest_geodes, max_geodes)
-		lower_limit = max(lower_limit, highest_geodes)
+		lower_limit    = max(highest_geodes, lower_limit)
 
 	return highest_geodes
 
