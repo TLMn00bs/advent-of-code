@@ -4,15 +4,8 @@ from enum import IntEnum, auto
 from itertools import count
 import re
 import logging
+from functools import lru_cache
 
-
-# https://es.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF
-def triangular_number(n: int) -> int:
-	if n <= 0: return 0
-	return n * (n + 1) // 2
-
-# Precompute for all required numbers
-triangular_numbers = {n: triangular_number(n) for n in range(32)}
 
 @define(kw_only=True)
 class Resources:
@@ -75,10 +68,6 @@ class Blueprint:
 			geode    = max(costs.geode    for costs in self.robot_costs.values()),
 		)
 
-	def is_buildable(self, resources: Resources, option: BuildOption) -> bool:
-		if option == BuildOption.NOP: return True
-		return self.robot_costs[option] <= resources
-
 	@staticmethod
 	def from_file(file: str) -> Iterable['Blueprint']:
 		parse_blueprint = re.compile(r'Blueprint (\d+): Each ore robot costs (\d+) ore. Each clay robot costs (\d+) ore. Each obsidian robot costs (\d+) ore and (\d+) clay. Each geode robot costs (\d+) ore and (\d+) obsidian.')
@@ -95,6 +84,13 @@ class Blueprint:
 					geode    = Resources(ore = geode_ore, obsidian = geode_obsidian)
 				)
 
+# https://es.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF
+@lru_cache(maxsize=50)
+def triangular_number(n: int) -> int:
+	if n <= 0: return 0
+	return n * (n + 1) // 2
+
+@lru_cache(maxsize=100)
 def best_collect_time(mineral_amount: int) -> int:
 	''' Compute the best time to collect the given amount of any mineral, assuming a current production of 0 and infinite of the required resources '''
 	remaining = mineral_amount
@@ -111,11 +107,29 @@ def max_aditional_geode(resources: Resources, production: Resources, blueprint: 
 	build_time = 1
 	if production.clay     == 0: build_time += best_collect_time(resources.clay     - blueprint.obsidian.clay)
 	if production.obsidian == 0: build_time += best_collect_time(resources.obsidian - blueprint.geode.obsidian)
-	return triangular_numbers[time - build_time]
+	return triangular_number(time - build_time)
 
 def ensured_resources(resources: Resources, production: Resources, time: int) -> int:
 	return resources.geode + (production.geode * time)
 
+
+def is_buildable(resources: Resources, costs: Resources) -> bool: return costs <= resources
+def should_build(resource_production: int, max_resource_cost: int, resources: Resources, production: Resources, costs: Resources, choices: List[BuildOption]) -> bool:
+	'''
+	The robot must not have been delayed (when a NOPE is selected having the option to build a robot, that robot should not be built again until something else is built, since there is no point in just delaying it)
+	It must make sense building it (it's production is < greater cost of that resource)
+	It must be buildable (costs <= resources)
+	'''
+	was_delayed = False
+	if len(choices) > 0 and choices[-1] == BuildOption.NOP:
+		prev_resources = resources - production
+		was_delayed = is_buildable(prev_resources, costs)
+
+	return (
+		not was_delayed                             and
+		resource_production < max_resource_cost     and
+		is_buildable(resources, costs)
+	)
 
 def build_options(resources: Resources, production: Resources, blueprint: Blueprint, time: int, choices: List[BuildOption]) -> Iterable[Tuple[BuildOption, Resources, Resources]]:
 	''' Return an iterable with all the available options
@@ -127,30 +141,22 @@ def build_options(resources: Resources, production: Resources, blueprint: Bluepr
 		return
 
 	# If we can build a geode robot, just do it
-	if blueprint.is_buildable(resources, BuildOption.GEODE):
+	if is_buildable(resources, blueprint.geode):
 		yield BuildOption.GEODE, blueprint.geode, Resources(geode=1)
 		return
 
 
-	# When a NOPE is generated having the option to build some robots,
-	# those robots should become banned from being built again until something else is built,
-	# since there is no point in delaying it
-	banned_robots: Set[BuildOption] = set()
-	if len(choices) > 0 and choices[-1] == BuildOption.NOP:
-		prev_resources = resources - production
-		banned_robots = set(robot for robot in blueprint.robot_costs if blueprint.is_buildable(prev_resources, robot))
-
-	
-	# Yield every buildable robot, but do not build a robot if it's production is >= greater cost of that resource
-	if BuildOption.OBSIDIAN not in banned_robots and production.obsidian < blueprint.max_costs.obsidian and blueprint.is_buildable(resources, BuildOption.OBSIDIAN):
+	# Yield every robot that makes sense building
+	if should_build(production.obsidian, blueprint.max_costs.obsidian, resources, production, blueprint.obsidian, choices):
 		yield BuildOption.OBSIDIAN, blueprint.obsidian, Resources(obsidian=1)
 
-	if BuildOption.CLAY not in banned_robots and production.clay < blueprint.max_costs.clay and blueprint.is_buildable(resources, BuildOption.CLAY):
+	if should_build(production.clay, blueprint.max_costs.clay, resources, production, blueprint.clay, choices):
 		yield BuildOption.CLAY, blueprint.clay, Resources(clay=1)
 
-	if BuildOption.ORE not in banned_robots and production.ore < blueprint.max_costs.ore and blueprint.is_buildable(resources, BuildOption.ORE):
+	if should_build(production.ore, blueprint.max_costs.ore, resources, production, blueprint.ore, choices):
 		yield BuildOption.ORE, blueprint.ore, Resources(ore=1)
 
+	# Not to build is always an option
 	yield BuildOption.NOP, Resources(), Resources()
 
 
@@ -159,8 +165,14 @@ def compute_largest_number_of_geodes(resources: Resources, production: Resources
 	ensured_geodes = ensured_resources(resources, production, time)
 	upper_limit = ensured_geodes + max_remaining_geodes
 
-	if max_remaining_geodes == 0 or upper_limit <= lower_limit:
+	# No more geodes extra can be obtained, just return whatever we are ensured to get
+	# with the current resources and production
+	if max_remaining_geodes == 0:
 		# print(f'{lower_limit=}, {ensured_geodes=}, {choices=}')
+		return ensured_geodes
+
+	# This branch will not be able to obtain more geodes that we have already gotten in another one
+	if upper_limit <= lower_limit:
 		return ensured_geodes
 
 	highest_geodes = 0
@@ -180,7 +192,7 @@ def compute_largest_number_of_geodes(resources: Resources, production: Resources
 		)
 
 		highest_geodes = max(highest_geodes, max_geodes)
-		lower_limit = max(lower_limit, highest_geodes)
+		lower_limit    = max(highest_geodes, lower_limit)
 
 	return highest_geodes
 
