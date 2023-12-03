@@ -2,6 +2,8 @@
 from typing import Dict, List
 import logging
 import re
+from sympy.solvers import solve
+from sympy import Symbol, Eq
 
 parse_monkey_rgx = re.compile('([a-z]+): (.*)')
 def read_file(file: str):
@@ -17,7 +19,7 @@ find_deps_rgx = re.compile('([a-z]+)')
 def find_dependencies(job: str) -> List[str]:
 	return find_deps_rgx.findall(job)
 
-def resolve(name: str, monkeys: Dict[str, str]) -> int:
+def resolve(name: str, monkeys: Dict[str, str]) -> str:
 	job = monkeys[name]
 
 	deps = find_dependencies(job)
@@ -27,14 +29,21 @@ def resolve(name: str, monkeys: Dict[str, str]) -> int:
 
 		deps = find_dependencies(job)
 
-	return int(eval(job))
+	return job
 
 def p1(args):
 	monkeys = read_file(args.file)
-	print(resolve('root', monkeys))
+	print(int(eval(resolve('root', monkeys))))
+
 
 def p2(args):
-	_ = read_file(args.file)
+	monkeys = read_file(args.file)
+	monkeys['root'] = re.sub('[+-/*]', '=', monkeys['root'])
+	monkeys['humn'] = 'X'
+
+	root_eq = resolve('root', monkeys)
+	root = re.sub('(.*) = (.*)', r'Eq(\1, \2)', root_eq).replace('X', 'Symbol("x")')
+	print(int(solve(eval(root))[0]))
 
 if __name__ == '__main__':
 	import argparse
