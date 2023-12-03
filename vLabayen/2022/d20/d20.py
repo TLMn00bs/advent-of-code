@@ -19,12 +19,12 @@ class Node:
 	def get_prev(self, n: int):
 		return reduce(lambda node, _: node.prev, range(n), self)
 
-	def mixed_neighbours(self) -> Tuple['Node', 'Node']:
+	def mixed_neighbours(self, mod: int) -> Tuple['Node', 'Node']:
 		if self.value > 0:
-			next = self.get_next(+self.value)
+			next = self.get_next(+self.value % mod)
 			return next, next.next
 		if self.value < 0:
-			prev = self.get_prev(-self.value)
+			prev = self.get_prev(-self.value % mod)
 			return prev.prev, prev
 
 		raise ValueError(f'No new neightbours')
@@ -37,7 +37,7 @@ def mix(nodes: List[Node]) -> None:
 			node.prev.next = node.next
 			node.next.prev = node.prev
 
-			new_prev, new_next = node.mixed_neighbours()
+			new_prev, new_next = node.mixed_neighbours(len(nodes) - 1)
 
 			new_prev.next = node
 			new_next.prev = node
