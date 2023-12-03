@@ -29,38 +29,31 @@ class Node:
 
 		raise ValueError(f'No new neightbours')
 
-@define
-class NodeList:
-	nodes: List[Node]
+def mix(nodes: List[Node]) -> None:
+	for node in nodes:
+		# print([node.get_next(i).value for i in range(len(nodes))])
 
-	def __iter__(self): return iter(self.nodes)
-	def __len__(self): return len(self.nodes)
+		if node.value != 0:
+			node.prev.next = node.next
+			node.next.prev = node.prev
 
-	def mix(self) -> None:
-		for node in self:
-			# print([node.get_next(i).value for i in range(len(self))])
+			new_prev, new_next = node.mixed_neighbours()
 
-			if node.value != 0:
-				node.prev.next = node.next
-				node.next.prev = node.prev
+			new_prev.next = node
+			new_next.prev = node
+			node.prev = new_prev
+			node.next = new_next
 
-				new_prev, new_next = node.mixed_neighbours()
+		# print([node.get_next(i).value for i in range(len(nodes))])
+		# print('---------------------')
 
-				new_prev.next = node
-				new_next.prev = node
-				node.prev = new_prev
-				node.next = new_next
+def find_zero(nodes: List[Node]) -> Node:
+	for node in nodes:
+		if node.value == 0: return node
 
-			# print([node.get_next(i).value for i in range(len(self))])
-			# print('---------------------')
+	raise ValueError(f'No zero found')
 
-	def find_zero(self) -> Node:
-		for node in self:
-			if node.value == 0: return node
-
-		raise ValueError(f'No zero found')
-
-def read_file(file: str) -> NodeList:
+def read_file(file: str) -> List[Node]:
 	with open(file, 'r') as f:
 		nodes = [Node(None, None, int(v)) for v in f]	# type: ignore
 
@@ -68,19 +61,17 @@ def read_file(file: str) -> NodeList:
 		node.prev = nodes[(i - 1) % len(nodes)]
 		node.next = nodes[(i + 1) % len(nodes)]
 
-	return NodeList(nodes)
+	return nodes
 
 
 def p1(args):
 	nodes = read_file(args.file)
-	# for n in nodes: print(n)
-	nodes.mix()
+	mix(nodes)
 
-	zero_node = nodes.find_zero()
+	zero_node = find_zero(nodes)
 	first  = zero_node.get_next(1000).value
 	second = zero_node.get_next(2000).value
 	third  = zero_node.get_next(3000).value
-	print(first, second, third)
 	print(first + second + third)
 
 
