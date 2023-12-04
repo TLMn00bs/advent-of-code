@@ -1,5 +1,6 @@
 import logging
 from typing import Set, Iterable
+from collections import Counter
 import re
 from attrs import define, field
 from math import pow
@@ -20,6 +21,9 @@ class Card:
 		if self.matched_numbers == 0: return 0
 		return int(pow(2, self.matched_numbers - 1))
 
+	@property
+	def awarded_cards(self) -> Iterable[int]:
+		return (self.id + n for n in range(1, self.matched_numbers + 1))
 
 def read_file(file: str) -> Iterable[Card]:
 	split_card_info_rgx = re.compile(r'Card +([0-9]+): ([0-9 ]+) \| ([0-9 ]+)')
@@ -39,7 +43,14 @@ def p1(args):
 	print(sum(card.points for card in cards))
 
 def p2(args):
-	_ = read_file(args.file)
+	cards = {card.id: card for card in read_file(args.file)}
+	cards_counter = Counter(cards.keys())
+
+	for current_card in cards.values(): cards_counter.update({
+		awarded_card_id: cards_counter[current_card.id] for awarded_card_id in current_card.awarded_cards
+	})
+
+	print(sum(cards_counter.values()))
 
 if __name__ == '__main__':
 	import argparse
