@@ -2,7 +2,7 @@
 import logging
 from file_parser import read_file
 from domain import Facing, apply_step, top_left_tile
-from wrap import LinearWrapper
+from wrap import LinearWrapper, CubeWrapper
 
 def p1(args):
 	tiles, path = read_file(args.file)
@@ -21,7 +21,9 @@ def p1(args):
 	
 
 def p2(args):
-	_ = read_file(args.file)
+	tiles, path = read_file(args.file)
+
+	wrapper = CubeWrapper({tile.position: tile for tile in tiles})
 
 if __name__ == '__main__':
 	import argparse

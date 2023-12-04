@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple
 from attrs import define, field
-from data_models import Coordinate, Tile
+from data_models import Coordinate, Tile, Face
 from collections import defaultdict
 import math
 from abc import ABC, abstractmethod
@@ -58,3 +58,36 @@ class LinearWrapper(Wrapper):
 	def get_up(self, tile: Tile) -> Tile:
 		x, y = tile.position
 		return self.tiles.get((x, y - 1)) or self.tiles[self.wrap_up(tile.position)]
+
+
+
+def group_by_cube_face(tiles: Dict[Coordinate, Tile]) -> List[Face]:
+	side_size = int(math.sqrt(len(tiles) / 6))
+
+	face_coordinates = set(Face.get_face_coordinate(position, side_size) for position in tiles.keys())
+	return [Face(
+		position = face_coord,
+		side_size = side_size,
+		tiles = [tiles[tile_position] for tile_position in Face.get_tile_coordinates(face_coord, side_size)]
+	) for face_coord in face_coordinates]
+
+
+@define
+class CubeWrapper(Wrapper):
+	tiles: Dict[Coordinate, Tile]
+
+	def __attrs_post_init__(self):
+		faces = group_by_cube_face(self.tiles)
+		for face in faces: print(face)
+
+	def get_right(self, tile: Tile) -> Tile:
+		...
+
+	def get_left(self, tile: Tile) -> Tile:
+		...
+
+	def get_down(self, tile: Tile) -> Tile:
+		...
+
+	def get_up(self, tile: Tile) -> Tile:
+		...
