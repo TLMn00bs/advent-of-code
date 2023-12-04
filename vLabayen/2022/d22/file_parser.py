@@ -1,6 +1,5 @@
 from typing import Iterable, Tuple, List, Dict
-from domain import Tile, Coordinate, TileType, Path
-from domain import wrap_right, wrap_left, wrap_down, wrap_up
+from data_models import Tile, Coordinate, TileType, Path
 from itertools import takewhile
 import re
 
@@ -8,16 +7,7 @@ def parse_tiles(raw_tiles: Iterable[Tuple[int, int, str]]) -> List[Tile]:
 	tiles: Dict[Coordinate, Tile] = {}
 	for x, y, c in raw_tiles:
 		if not TileType.valid_type(c): continue
-		tiles[(x, y)] = Tile(
-			(x, y), TileType(c),
-			None, None, None, None		# type: ignore
-		)
-
-	for (x, y), tile in tiles.items():
-		tile.right = tiles.get((x + 1, y)) or wrap_right((x, y), tiles)
-		tile.left  = tiles.get((x - 1, y)) or wrap_left ((x, y), tiles)
-		tile.down  = tiles.get((x, y + 1)) or wrap_down ((x, y), tiles)
-		tile.up    = tiles.get((x, y - 1)) or wrap_up   ((x, y), tiles)
+		tiles[(x, y)] = Tile((x, y), TileType(c))
 
 	return list(tiles.values())
 
