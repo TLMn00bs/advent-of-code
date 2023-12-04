@@ -1,8 +1,5 @@
-from typing import Tuple, Dict, List
-import math
-from itertools import product
-
-from data_models import Tile, TileType, Facing, Step 
+from typing import Tuple, List
+from data_models import Tile, TileType, Facing, Step
 from wrap import Wrapper
 
 
