@@ -82,3 +82,7 @@ def apply_step(tile: Tile, facing: Facing, step: Step) -> Tuple[Tile, Facing]:
 		tile = next
 	
 	return tile, facing
+
+
+def top_left_tile(tiles: List[Tile]) -> Tile:
+	return min((tile for tile in tiles), key = lambda tile: (tile.position[1], tile.position[0]))

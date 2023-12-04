@@ -1,13 +1,12 @@
 #!/bin/python3
 import logging
 from file_parser import read_file
-from domain import Facing, apply_step
-
+from domain import Facing, apply_step, top_left_tile
 
 def p1(args):
 	tiles, path = read_file(args.file)
 
-	current_tile = min((tile for tile in tiles), key = lambda tile: (tile.position[1], tile.position[0]))
+	current_tile = top_left_tile(tiles)
 	facing = Facing.RIGHT
 
 	# print(current_tile.position, facing)
