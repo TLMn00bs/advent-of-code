@@ -1,7 +1,7 @@
 import logging
 from typing import Set, Iterable
 import re
-from attrs import define
+from attrs import define, field
 from math import pow
 
 
@@ -11,11 +11,15 @@ class Card:
 	winning_numbers: Set[int]
 	card_numbers: Set[int]
 
+	matched_numbers: int = field(init=False)
+	def __attrs_post_init__(self):
+		self.matched_numbers = len(self.card_numbers.intersection(self.winning_numbers))
+
 	@property
 	def points(self) -> int:
-		matched_numbers = self.card_numbers.intersection(self.winning_numbers)
-		if len(matched_numbers) == 0: return 0
-		return int(pow(2, len(matched_numbers) - 1))
+		if self.matched_numbers == 0: return 0
+		return int(pow(2, self.matched_numbers - 1))
+
 
 def read_file(file: str) -> Iterable[Card]:
 	split_card_info_rgx = re.compile(r'Card +([0-9]+): ([0-9 ]+) \| ([0-9 ]+)')
