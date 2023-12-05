@@ -8,6 +8,11 @@ parse_seeds_rgx = re.compile('[0-9]+')
 def read_seeds(lines: Generator[str, None, None]) -> List[int]:
 	return [int(seed) for seed in parse_seeds_rgx.findall(next(lines).split(':')[1])]
 
+
+def seeds_as_ranges(seeds: List[int]) -> List[Range]:
+	pairs_gen = (seeds[2*i:2*(i+1)] for i in range(len(seeds) // 2))
+	return [Range(start, start + size) for start, size in pairs_gen]
+
 parse_range_rgx = re.compile('([0-9]+) ([0-9]+) ([0-9]+)')
 def read_map(lines: Generator[str, None, None]) -> Map:
 	next(lines)
@@ -41,10 +46,18 @@ def p1(args):
 	map = Map.merge_maps(maps)
 
 	print(min(map.transform(seed) for seed in seeds))
-	
 
 def p2(args):
-	_ = read_file(args.file)
+	seeds, maps = read_file(args.file)
+	map = Map.merge_maps(maps)
+
+	sorted_transformations = sorted(map.transformations, key=lambda t: t.dst_range.start)
+	for transform in sorted_transformations:
+		for seed_range in seeds_as_ranges(seeds):
+			_, union, _ = transform.src_range.merge(seed_range)
+			if union is not None:
+				print(union.start + transform.add_src2dst)
+				return
 
 if __name__ == '__main__':
 	import argparse
