@@ -3,7 +3,6 @@ from typing import Generator, List
 import re
 from data_models import Map, Transformation, Range
 
-
 parse_seeds_rgx = re.compile('[0-9]+')
 def read_seeds(lines: Generator[str, None, None]) -> List[int]:
 	return [int(seed) for seed in parse_seeds_rgx.findall(next(lines).split(':')[1])]
@@ -58,6 +57,13 @@ def p2(args):
 			if union is not None:
 				print(union.start + transform.add_src2dst)
 				return
+
+	# KNOWN BUG: If there is no mapped seeds, the loop above will not return.
+	# In that case, just print(min(seed_range.start for seed_range in seeds_as_ranges(seeds))
+
+	# KNOWN BUG: If there is an unmapped seed closer that the closest mapped seed
+	# We actually should get the closest mapped seed wrapping the loop above in a function, and returning instead of printing
+	# Then compute the closest unmapped seed, and take the min between those values
 
 if __name__ == '__main__':
 	import argparse
