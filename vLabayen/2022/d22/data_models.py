@@ -1,5 +1,5 @@
 from typing import Tuple, Union, Literal, List, Iterable
-from attrs import define
+from attrs import define, field
 from enum import Enum
 from itertools import product
 
@@ -44,9 +44,7 @@ FaceCoordinate = Tuple[int, int]
 class Face:
 	position: FaceCoordinate
 	side_size: int
-	tiles: List[Tile]
-
-	def __str__(self) -> str: return f'Face(position={self.position}, side_size={self.side_size})'
+	tiles: List[Tile] = field(repr=False)
 
 	@staticmethod
 	def get_face_coordinate(position: Coordinate, side_size: int) -> FaceCoordinate:
