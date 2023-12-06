@@ -47,7 +47,13 @@ def p1(args):
 	print(reduce(lambda acc, next: acc * next, number_of_winning_options, 1))
 
 def p2(args):
-	_ = read_file(args.file)
+	races = read_file(args.file)
+	race = Race(
+		time     = int(''.join(str(race.time)     for race in races)),
+		distance = int(''.join(str(race.distance) for race in races))
+	)
+
+	print(get_number_of_wining_options(race))
 
 if __name__ == '__main__':
 	import argparse
