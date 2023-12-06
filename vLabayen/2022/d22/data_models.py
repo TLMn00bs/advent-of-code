@@ -81,58 +81,57 @@ class Point3D:
 class RotationInfo:
 	incr_x: int
 	incr_y: int
+	is_rotation_axis: Callable[[Point3D], bool]
+	is_rotation_oposed_axis: Callable[[Point3D], bool]
 
 @define
 class Cube3D:
 	points: List[Point3D]
 
 	def _rotation_info(self, direction: Facing) -> RotationInfo:
+		max_x = max(p.current_x for p in self.points)
+		min_x = min(p.current_x for p in self.points)
+		max_y = max(p.current_y for p in self.points)
+		min_y = min(p.current_y for p in self.points)
+
 		if direction == Facing.UP: return RotationInfo(
 			incr_x = 0, incr_y = -1,
+			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_y == min_x,
+			is_rotation_oposed_axis = lambda p: p.current_z == 0 and p.current_y == max_y,
 		)
 		if direction == Facing.RIGHT: return RotationInfo(
 			incr_x = 1, incr_y = 0,
+			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_x == max_x,
+			is_rotation_oposed_axis = lambda p: p.current_z == 0 and p.current_x == min_x,
 		)
 		if direction == Facing.DOWN: return RotationInfo(
 			incr_x = 0, incr_y = 1,
+			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_y == max_x,
+			is_rotation_oposed_axis = lambda p: p.current_z == 0 and p.current_y == min_y,
 		)
 		if direction == Facing.LEFT: return RotationInfo(
 			incr_x = -1, incr_y = 0,
+			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_x == min_x,
+			is_rotation_oposed_axis = lambda p: p.current_z == 0 and p.current_x == max_x,
 		)
 
 	def rotate(self, direction: Facing) -> 'Cube3D':
 		rotation_info = self._rotation_info(direction)
 		points = [p.copy() for p in self.points]
 
-		# Suponiendo que Facing.UP
-		max_y = max(p.current_y for p in points)
-		min_y = min(p.current_y for p in points)
+		for p in points:
+			if rotation_info.is_rotation_axis(p): continue
 
-		if direction == Facing.UP:
-			for p in points:
-				# Eje de rotacion
-				if p.current_z == 0 and p.current_y == max_y: continue
-
-				# Esquina opuesta al eje de rotacion
-				if p.current_z == 1 and p.current_y == min_y:
-					p.current_position = p.current_x, p.current_y + (2 * rotation_info.incr_y), p.current_z
-
-				# Esquinas adyacentes al eje de rotacion
-				else:
-					p.current_position = p.current_x, p.current_y + rotation_info.incr_y, (0 if p.current_z == 1 else 1)
-
-
-		if direction == Facing.DOWN:
-			for p in points:
-				if p.current_z == 0 and p.current_y == min_y: continue
-
-				# Esquina opuesta al eje de rotacion
-				if p.current_z == 1 and p.current_y == max_y:
-					p.current_position = p.current_x, p.current_y + (2 * rotation_info.incr_y), p.current_z
-
-				# Esquinas adyacentes al eje de rotacion
-				else:
-					p.current_position = p.current_x, p.current_y + rotation_info.incr_y, (0 if p.current_z == 1 else 1)
+			if rotation_info.is_rotation_oposed_axis(p): p.current_position = (
+				p.current_x + (2 * rotation_info.incr_x),
+				p.current_y + (2 * rotation_info.incr_y),
+				p.current_z
+			)
+			else: p.current_position = (
+				p.current_x + rotation_info.incr_x,
+				p.current_y + rotation_info.incr_y,
+				(0 if p.current_z == 1 else 1)
+			)
 
 		return Cube3D(points)
 
