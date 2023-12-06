@@ -44,7 +44,7 @@ class Face:
 	tiles: List[Tile] = field(repr=False)
 
 	@staticmethod
-	def get_face_coordinate(position: Coordinate, side_size: int) -> Coordinate:
+	def get_coordinate(tile_position: Coordinate, side_size: int) -> Coordinate:
 		''' Get the face coordinate of the given tile's position '''
-		x, y = position
+		x, y = tile_position
 		return (x - 1) // side_size, (y - 1) // side_size

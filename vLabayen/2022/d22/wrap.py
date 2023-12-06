@@ -66,7 +66,7 @@ def group_by_cube_face(tiles: Dict[Coordinate, Tile]) -> List[Face]:
 
 	faces = defaultdict(lambda: [])
 	for tile in tiles.values():
-		face_position = Face.get_face_coordinate(tile.position, side_size)
+		face_position = Face.get_coordinate(tile.position, side_size)
 		faces[face_position].append(tile)
 
 	return [Face(
