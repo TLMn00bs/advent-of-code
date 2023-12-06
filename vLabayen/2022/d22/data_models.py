@@ -1,4 +1,4 @@
-from typing import Tuple, Union, Literal, List
+from typing import Tuple, Union, Literal, List, Callable
 from attrs import define, field, Factory
 from enum import Enum
 
@@ -78,20 +78,31 @@ class Point3D:
 		return Point3D(self.x, self.y, self.z, self.current_x, self.current_y, self.current_z)
 
 @define
+class RotationInfo:
+	incr_x: int
+	incr_y: int
+
+@define
 class Cube3D:
 	points: List[Point3D]
 
-	def _rotation_info(self, direction: Facing) -> Tuple[int, int]:
-		return {
-			Facing.UP   : ( 0, -1),
-			Facing.RIGHT: ( 1,  0),
-			Facing.DOWN : ( 0,  1),
-			Facing.LEFT : (-1,  0),
-		}[direction]
+	def _rotation_info(self, direction: Facing) -> RotationInfo:
+		if direction == Facing.UP: return RotationInfo(
+			incr_x = 0, incr_y = -1,
+		)
+		if direction == Facing.RIGHT: return RotationInfo(
+			incr_x = 1, incr_y = 0,
+		)
+		if direction == Facing.DOWN: return RotationInfo(
+			incr_x = 0, incr_y = 1,
+		)
+		if direction == Facing.LEFT: return RotationInfo(
+			incr_x = -1, incr_y = 0,
+		)
 
 	def rotate(self, direction: Facing) -> 'Cube3D':
+		rotation_info = self._rotation_info(direction)
 		points = [p.copy() for p in self.points]
-		incr_x, incr_y = self._rotation_info(direction)
 
 		# Suponiendo que Facing.UP
 		max_y = max(p.current_y for p in points)
@@ -103,12 +114,12 @@ class Cube3D:
 				if p.current_z == 0 and p.current_y == max_y: continue
 
 				# Esquina opuesta al eje de rotacion
-				if p.current_z == 1 and p.current_y == max_y - 1:
-					p.current_position = p.current_x, p.current_y + (2 * incr_y), p.current_z
+				if p.current_z == 1 and p.current_y == min_y:
+					p.current_position = p.current_x, p.current_y + (2 * rotation_info.incr_y), p.current_z
 
 				# Esquinas adyacentes al eje de rotacion
 				else:
-					p.current_position = p.current_x, p.current_y + incr_y, (0 if p.current_z == 1 else 1)
+					p.current_position = p.current_x, p.current_y + rotation_info.incr_y, (0 if p.current_z == 1 else 1)
 
 
 		if direction == Facing.DOWN:
@@ -116,12 +127,12 @@ class Cube3D:
 				if p.current_z == 0 and p.current_y == min_y: continue
 
 				# Esquina opuesta al eje de rotacion
-				if p.current_z == 1 and p.current_y == min_y + 1:
-					p.current_position = p.current_x, p.current_y + (2 * incr_y), p.current_z
+				if p.current_z == 1 and p.current_y == max_y:
+					p.current_position = p.current_x, p.current_y + (2 * rotation_info.incr_y), p.current_z
 
 				# Esquinas adyacentes al eje de rotacion
 				else:
-					p.current_position = p.current_x, p.current_y + incr_y, (0 if p.current_z == 1 else 1)
+					p.current_position = p.current_x, p.current_y + rotation_info.incr_y, (0 if p.current_z == 1 else 1)
 
 		return Cube3D(points)
 
