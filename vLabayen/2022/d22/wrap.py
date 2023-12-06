@@ -71,7 +71,6 @@ def group_by_cube_face(tiles: Dict[Coordinate, Tile]) -> List[Face]:
 
 	return [Face(
 		position = face_position,
-		side_size = side_size,
 		tiles = face_tiles
 	) for face_position, face_tiles in faces.items()]
 

@@ -138,7 +138,6 @@ class Cube3D:
 @define
 class Face:
 	position: Coordinate
-	side_size: int
 	tiles: List[Tile] = field(repr=False)
 
 	points: Tuple[Point, Point, Point, Point] = field(init=False, repr=False)
