@@ -1,7 +1,6 @@
-from typing import Tuple, Union, Literal, List, Iterable
+from typing import Tuple, Union, Literal, List
 from attrs import define, field
 from enum import Enum
-from itertools import product
 
 Coordinate = Tuple[int, int]
 Step = Union[int, Literal['R', 'L']]
@@ -51,9 +50,3 @@ class Face:
 		''' Get the face coordinate of the given tile's position '''
 		x, y = position
 		return (x - 1) // side_size, (y - 1) // side_size
-
-	@staticmethod
-	def get_tile_coordinates(position: FaceCoordinate, side_size: int) -> Iterable[Coordinate]:
-		x, y = position
-		x_start, y_start = x * side_size + 1, y * side_size + 1
-		return ((x_start + x_incr, y_start + y_incr) for x_incr, y_incr in product(range(0, side_size, 1), range(0, side_size, 1)))

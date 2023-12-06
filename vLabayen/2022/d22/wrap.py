@@ -64,12 +64,16 @@ class LinearWrapper(Wrapper):
 def group_by_cube_face(tiles: Dict[Coordinate, Tile]) -> List[Face]:
 	side_size = int(math.sqrt(len(tiles) / 6))
 
-	face_coordinates = set(Face.get_face_coordinate(position, side_size) for position in tiles.keys())
+	faces = defaultdict(lambda: [])
+	for tile in tiles.values():
+		face_position = Face.get_face_coordinate(tile.position, side_size)
+		faces[face_position].append(tile)
+
 	return [Face(
-		position = face_coord,
+		position = face_position,
 		side_size = side_size,
-		tiles = [tiles[tile_position] for tile_position in Face.get_tile_coordinates(face_coord, side_size)]
-	) for face_coord in face_coordinates]
+		tiles = face_tiles
+	) for face_position, face_tiles in faces.items()]
 
 
 @define
