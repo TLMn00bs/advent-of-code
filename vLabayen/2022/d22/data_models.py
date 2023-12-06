@@ -49,6 +49,12 @@ class Point:
 		)
 
 @define
+class Point3D:
+	x: int
+	y: int
+	z: int
+
+@define
 class Face:
 	position: Coordinate
 	side_size: int

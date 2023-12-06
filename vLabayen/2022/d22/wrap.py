@@ -1,6 +1,6 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Iterable, Optional
 from attrs import define, field
-from data_models import Coordinate, Tile, Face
+from data_models import Coordinate, Tile, Face, Point3D, Facing
 from collections import defaultdict, Counter
 import math
 from abc import ABC, abstractmethod
@@ -75,19 +75,40 @@ def group_by_cube_face(tiles: Dict[Coordinate, Tile]) -> List[Face]:
 		tiles = face_tiles
 	) for face_position, face_tiles in faces.items()]
 
-def get_middle_face(faces: List[Face]) -> Face:
+def get_middle_face(faces: Iterable[Face]) -> Face:
 	points_count = Counter(p for face in faces for p in face.points)
 	_, middle_face = max((sum(points_count[p] for p in face.points), face) for face in faces)
 	return middle_face
 
+def get_neighbours(face_position: Coordinate, faces: Dict[Coordinate, Face]) -> Tuple[Optional[Face], Optional[Face], Optional[Face], Optional[Face]]:
+	''' Return values are: top, right, bottom, left '''
+	x, y = face_position
+
+	return (
+		faces.get((x    , y - 1), None),
+		faces.get((x + 1, y    ), None),
+		faces.get((x    , y + 1), None),
+		faces.get((x - 1, y    ), None),
+	)
+
+def unwrap(towards: Face, direction: Facing, points: List[Point3D], faces: Dict[Coordinate, Face]) -> None:
+	print(points)
 
 @define
 class CubeWrapper(Wrapper):
 	tiles: Dict[Coordinate, Tile]
 
 	def __attrs_post_init__(self):
-		faces = group_by_cube_face(self.tiles)
-		middle_face = get_middle_face(faces)
+		faces = {face.position: face for face in group_by_cube_face(self.tiles)}
+		middle_face = get_middle_face(faces.values())
+
+		top, right, bottom, left = get_neighbours(middle_face.position, faces)
+		if top is not None: unwrap(
+			towards = top,
+			direction = Facing.UP,
+			points = [Point3D(*p.position, 0) for p in top.points for z in {0, 1}],
+			faces = faces
+		)
 
 	def get_right(self, tile: Tile) -> Tile:
 		...
