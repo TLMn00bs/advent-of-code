@@ -36,12 +36,27 @@ class Tile:
 class Path:
 	steps: List[Step]
 
+@define(hash=True, frozen=True)
+class Point:
+	position: Coordinate
+
+	@staticmethod
+	def get_coordinates(face_position: Coordinate) -> Tuple[Coordinate, Coordinate, Coordinate, Coordinate]:
+		x, y = face_position
+		return (
+			(x, y    ), (x + 1, y    ),
+			(x, y + 1), (x + 1, y + 1)
+		)
 
 @define
 class Face:
 	position: Coordinate
 	side_size: int
 	tiles: List[Tile] = field(repr=False)
+
+	points: Tuple[Point, Point, Point, Point] = field(init=False, repr=False)
+	def __attrs_post_init__(self):
+		self.points = tuple(Point(position) for position in Point.get_coordinates(self.position))
 
 	@staticmethod
 	def get_coordinate(tile_position: Coordinate, side_size: int) -> Coordinate:
