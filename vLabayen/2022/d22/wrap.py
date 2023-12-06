@@ -1,6 +1,6 @@
-from typing import Dict, List, Tuple, Iterable, Optional
+from typing import Dict, List, Tuple, Iterable
 from attrs import define, field
-from data_models import Coordinate, Tile, Face, Point3D, Facing
+from data_models import Coordinate, Tile, Face, Point3D, Cube3D, Facing
 from collections import defaultdict, Counter
 import math
 from abc import ABC, abstractmethod
@@ -80,19 +80,29 @@ def get_middle_face(faces: Iterable[Face]) -> Face:
 	_, middle_face = max((sum(points_count[p] for p in face.points), face) for face in faces)
 	return middle_face
 
-def get_neighbours(face_position: Coordinate, faces: Dict[Coordinate, Face]) -> Tuple[Optional[Face], Optional[Face], Optional[Face], Optional[Face]]:
-	''' Return values are: top, right, bottom, left '''
+def get_neighbours(face_position: Coordinate, faces: Dict[Coordinate, Face]) -> Iterable[Tuple[Face, Facing]]:
 	x, y = face_position
 
-	return (
-		faces.get((x    , y - 1), None),
-		faces.get((x + 1, y    ), None),
-		faces.get((x    , y + 1), None),
-		faces.get((x - 1, y    ), None),
-	)
+	top    = faces.get((x    , y - 1), None)
+	right  = faces.get((x + 1, y    ), None)
+	bottom = faces.get((x    , y + 1), None)
+	left   = faces.get((x - 1, y    ), None)
 
-def unwrap(towards: Face, direction: Facing, points: List[Point3D], faces: Dict[Coordinate, Face]) -> None:
-	print(points)
+	if top   : yield top   , Facing.UP
+	if right : yield right , Facing.RIGHT
+	if bottom: yield bottom, Facing.DOWN
+	if left  : yield left  , Facing.LEFT
+
+def unwrap(towards: Face, direction: Facing, cube: Cube3D, faces: Dict[Coordinate, Face]) -> Iterable[Tuple[Face, List[Point3D]]]:
+	rotated_cube = cube.rotate(direction)
+
+	floor_points = [point for point in rotated_cube.points if point.current_z == 0]
+	yield (towards, floor_points)
+
+	for next_face, next_direction in get_neighbours(towards.position, faces):
+		if next_direction == direction.oposing_direction(): continue
+		for face, points in unwrap(next_face, next_direction, rotated_cube, faces):
+			yield face, points
 
 @define
 class CubeWrapper(Wrapper):
@@ -101,14 +111,13 @@ class CubeWrapper(Wrapper):
 	def __attrs_post_init__(self):
 		faces = {face.position: face for face in group_by_cube_face(self.tiles)}
 		middle_face = get_middle_face(faces.values())
+		cube = Cube3D([Point3D(*p.position, z) for p in middle_face.points for z in {0, 1}])
 
-		top, right, bottom, left = get_neighbours(middle_face.position, faces)
-		if top is not None: unwrap(
-			towards = top,
-			direction = Facing.UP,
-			points = [Point3D(*p.position, 0) for p in top.points for z in {0, 1}],
-			faces = faces
-		)
+		neighbour_faces = get_neighbours(middle_face.position, faces)
+		for neighbour, direction in neighbour_faces:
+			for face, points in unwrap(neighbour, direction, cube, faces):
+				print(face, points)
+
 
 	def get_right(self, tile: Tile) -> Tile:
 		...

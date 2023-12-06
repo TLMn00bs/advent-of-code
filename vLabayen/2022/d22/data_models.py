@@ -1,5 +1,5 @@
 from typing import Tuple, Union, Literal, List
-from attrs import define, field
+from attrs import define, field, Factory
 from enum import Enum
 
 Coordinate = Tuple[int, int]
@@ -24,6 +24,9 @@ class Facing(Enum):
 	
 	def rotate_counterclockwise(self) -> 'Facing':
 		return Facing((self.value - 1) % 4)
+
+	def oposing_direction(self) -> 'Facing':
+		return Facing((self.value + 2) % 4)
 
 @define
 class Tile:
@@ -50,9 +53,37 @@ class Point:
 
 @define
 class Point3D:
-	x: int
-	y: int
-	z: int
+	x: int = field(repr=False)
+	y: int = field(repr=False)
+	z: int = field(repr=False)
+
+	# Keep the starting position inmutable
+	current_x: int = field(repr=True, default=Factory(lambda self: self.x, takes_self=True))
+	current_y: int = field(repr=True, default=Factory(lambda self: self.y, takes_self=True))
+	current_z: int = field(repr=True, default=Factory(lambda self: self.z, takes_self=True))
+
+	@property
+	def starting_position(self) -> Tuple[int, int, int]:
+		return self.x, self.y, self.x
+
+	@property
+	def current_position(self) -> Tuple[int, int, int]:
+		return self.current_x, self.current_y, self.current_z
+
+	@current_position.setter
+	def current_position(self, value: Tuple[int, int, int]):
+		self.current_x, self.current_y, self.current_z = value
+
+	def copy(self) -> 'Point3D':
+		return Point3D(self.x, self.y, self.z, self.current_x, self.current_y, self.current_z)
+
+@define
+class Cube3D:
+	points: List[Point3D]
+
+	def rotate(self, direction: Facing) -> 'Cube3D':
+		points = [p.copy() for p in self.points]
+		return Cube3D(points)
 
 @define
 class Face:
