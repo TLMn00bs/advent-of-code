@@ -37,16 +37,14 @@ class Path:
 	steps: List[Step]
 
 
-FaceCoordinate = Tuple[int, int]
-
 @define
 class Face:
-	position: FaceCoordinate
+	position: Coordinate
 	side_size: int
 	tiles: List[Tile] = field(repr=False)
 
 	@staticmethod
-	def get_face_coordinate(position: Coordinate, side_size: int) -> FaceCoordinate:
+	def get_face_coordinate(position: Coordinate, side_size: int) -> Coordinate:
 		''' Get the face coordinate of the given tile's position '''
 		x, y = position
 		return (x - 1) // side_size, (y - 1) // side_size
