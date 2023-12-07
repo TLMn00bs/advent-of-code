@@ -112,6 +112,7 @@ class CubeWrapper(Wrapper):
 		middle_face = get_middle_face(faces.values())
 		cube = Cube3D([Point3D(*p.position, z) for p in middle_face.points for z in {0, 1}])
 
+		print(middle_face, [point for point in cube.points if point.current_z == 0])
 		neighbour_faces = get_neighbours(middle_face.position, faces)
 		for neighbour, direction in neighbour_faces:
 			for face, points in unwrap(neighbour, direction, cube, faces):

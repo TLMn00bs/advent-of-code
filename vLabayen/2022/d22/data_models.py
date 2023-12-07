@@ -96,23 +96,23 @@ class Cube3D:
 
 		if direction == Facing.UP: return RotationInfo(
 			incr_x = 0, incr_y = -1,
-			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_y == min_x,
-			is_rotation_oposed_axis = lambda p: p.current_z == 0 and p.current_y == max_y,
+			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_y == min_y,
+			is_rotation_oposed_axis = lambda p: p.current_z == 1 and p.current_y == max_y,
 		)
 		if direction == Facing.RIGHT: return RotationInfo(
 			incr_x = 1, incr_y = 0,
 			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_x == max_x,
-			is_rotation_oposed_axis = lambda p: p.current_z == 0 and p.current_x == min_x,
+			is_rotation_oposed_axis = lambda p: p.current_z == 1 and p.current_x == min_x,
 		)
 		if direction == Facing.DOWN: return RotationInfo(
 			incr_x = 0, incr_y = 1,
-			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_y == max_x,
-			is_rotation_oposed_axis = lambda p: p.current_z == 0 and p.current_y == min_y,
+			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_y == max_y,
+			is_rotation_oposed_axis = lambda p: p.current_z == 1 and p.current_y == min_y,
 		)
 		if direction == Facing.LEFT: return RotationInfo(
 			incr_x = -1, incr_y = 0,
 			is_rotation_axis        = lambda p: p.current_z == 0 and p.current_x == min_x,
-			is_rotation_oposed_axis = lambda p: p.current_z == 0 and p.current_x == max_x,
+			is_rotation_oposed_axis = lambda p: p.current_z == 1 and p.current_x == max_x,
 		)
 
 	def rotate(self, direction: Facing) -> 'Cube3D':
