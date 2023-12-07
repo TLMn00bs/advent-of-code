@@ -19,9 +19,16 @@ class HandType(Enum):
 
 	@staticmethod
 	def get_type(cards: Iterable[int]) -> 'HandType':
-		cards_count = Counter(cards)
-		num_unique_cards = len(cards_count)
-		(_, max_repeat), = cards_count.most_common(1)
+		num_jokers = sum(1 for card in cards if card == 1)
+		remaining_cards = [card for card in cards if card != 1]
+
+		if len(remaining_cards) == 0:
+			num_unique_cards, max_repeat = 1, 5
+		else:
+			cards_count = Counter(remaining_cards)
+			num_unique_cards = len(cards_count)
+			(_, max_repeat), = cards_count.most_common(1)
+			max_repeat += num_jokers
 
 		if num_unique_cards == 5: return HandType.HIGH_CARD
 		if num_unique_cards == 4: return HandType.ONE_PAIR
@@ -30,7 +37,7 @@ class HandType(Enum):
 		if num_unique_cards == 2 and max_repeat == 4: return HandType.FOUR_OF_A_KIND
 		if num_unique_cards == 2 and max_repeat == 3: return HandType.FULL_HOUSE
 		if num_unique_cards == 1: return HandType.FIVE_OF_A_KIND
-		raise ValueError(f'Unknown hand type: {cards_count=}, {max_repeat=}')
+		raise ValueError(f'Unknown hand type: {cards=}, {num_unique_cards=}, {max_repeat=}')
 
 @define
 class Hand:
@@ -53,7 +60,9 @@ def p1(args):
 	print(sum((i + 1) * hand.bid for i, hand in enumerate(sorted_hands)))
 
 def p2(args):
-	_ = read_file(args.file, {'A': 14, 'K': 13, 'Q': 12, 'J': 1, 'T': 10})
+	hands = read_file(args.file, {'A': 14, 'K': 13, 'Q': 12, 'J': 1, 'T': 10})
+	sorted_hands = sorted(hands, key = lambda hand: (hand.type.value, *hand.cards))
+	print(sum((i + 1) * hand.bid for i, hand in enumerate(sorted_hands)))
 
 if __name__ == '__main__':
 	import argparse
