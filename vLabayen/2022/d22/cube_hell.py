@@ -1,10 +1,10 @@
 from typing import Tuple, List, Callable, Tuple, Iterable, Dict
 from attrs import define, field, Factory
 from data_models import Coordinate, Tile, Facing
-from collections import defaultdict, Counter
+from collections import defaultdict
 import math
 
-@define(hash=True, frozen=True)
+@define
 class Point:
 	position: Coordinate
 
@@ -115,6 +115,7 @@ class Face:
 		x, y = tile_position
 		return (x - 1) // side_size, (y - 1) // side_size
 
+
 def group_by_cube_face(tiles: Dict[Coordinate, Tile]) -> List[Face]:
 	side_size = int(math.sqrt(len(tiles) / 6))
 
@@ -127,11 +128,6 @@ def group_by_cube_face(tiles: Dict[Coordinate, Tile]) -> List[Face]:
 		position = face_position,
 		tiles = face_tiles
 	) for face_position, face_tiles in faces.items()]
-
-def get_middle_face(faces: Iterable[Face]) -> Face:
-	points_count = Counter(p for face in faces for p in face.points)
-	_, middle_face = max((sum(points_count[p] for p in face.points), face) for face in faces)
-	return middle_face
 
 def get_neighbours(face_position: Coordinate, faces: Dict[Coordinate, Face]) -> Iterable[Tuple[Face, Facing]]:
 	x, y = face_position
