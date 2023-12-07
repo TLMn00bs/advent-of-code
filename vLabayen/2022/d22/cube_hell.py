@@ -2,7 +2,6 @@ from typing import Tuple, List, Callable, Tuple, Iterable, Dict, Optional
 from attrs import define, field, Factory
 from data_models import Coordinate, Tile, Facing
 from collections import defaultdict
-import math
 
 @define
 class Point:
@@ -116,9 +115,7 @@ class Face:
 		return (x - 1) // side_size, (y - 1) // side_size
 
 
-def group_by_cube_face(tiles: Dict[Coordinate, Tile]) -> List[Face]:
-	side_size = int(math.sqrt(len(tiles) / 6))
-
+def group_by_cube_face(tiles: Dict[Coordinate, Tile], side_size: int) -> List[Face]:
 	faces = defaultdict(lambda: [])
 	for tile in tiles.values():
 		face_position = Face.get_coordinate(tile.position, side_size)

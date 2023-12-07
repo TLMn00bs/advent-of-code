@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 from attrs import define, field
-from data_models import Coordinate, Tile
-from cube_hell import group_by_cube_face, unwrap
+from data_models import Coordinate, Tile, Facing
+from cube_hell import Face, group_by_cube_face, unwrap
 from collections import defaultdict
 import math
 from abc import ABC, abstractmethod
@@ -65,10 +65,17 @@ class LinearWrapper(Wrapper):
 class CubeWrapper(Wrapper):
 	tiles: Dict[Coordinate, Tile]
 
+	side_size: int = field(init=False, repr=False)
+	faces: Dict[Coordinate, Face] = field(init=False, repr=False)
 	def __attrs_post_init__(self):
-		faces = {face.position: face for face in group_by_cube_face(self.tiles)}
-		points = {face.position: points for face, points in unwrap(faces)}
-		
+		side_size = int(math.sqrt(len(self.tiles) / 6))
+
+		self.faces = {face.position: face for face in group_by_cube_face(self.tiles, side_size)}
+		points = {face.position: points for face, points in unwrap(self.faces)}
+
+	def wrap_up(self, position: Coordinate) -> Coordinate:
+		face = self.faces[Face.get_coordinate(position, self.side_size)]
+		return face.wrap_up(position)		# type: ignore
 
 	def get_right(self, tile: Tile) -> Tile:
 		...
@@ -80,4 +87,5 @@ class CubeWrapper(Wrapper):
 		...
 
 	def get_up(self, tile: Tile) -> Tile:
-		...
+		x, y = tile.position
+		return self.tiles.get((x, y - 1)) or self.tiles[self.wrap_up(tile.position)]
