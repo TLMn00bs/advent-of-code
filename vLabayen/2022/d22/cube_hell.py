@@ -142,12 +142,13 @@ def get_neighbours(face_position: Coordinate, faces: Dict[Coordinate, Face]) -> 
 	if bottom: yield bottom, Facing.DOWN
 	if left  : yield left  , Facing.LEFT
 
+def get_matching_points(cube: Cube3D) -> List[Point3D]:
+	return [point for point in cube.points if point.current_z == 0]
+
 def unwrap(towards: Face, direction: Facing, cube: Cube3D, faces: Dict[Coordinate, Face]) -> Iterable[Tuple[Face, List[Point3D]]]:
 	rotated_cube = cube.rotate(direction)
 
-	floor_points = [point for point in rotated_cube.points if point.current_z == 0]
-	yield (towards, floor_points)
-
+	yield (towards, get_matching_points(rotated_cube))
 	for next_face, next_direction in get_neighbours(towards.position, faces):
 		if next_direction == direction.oposing_direction(): continue
 		for face, points in unwrap(next_face, next_direction, rotated_cube, faces):

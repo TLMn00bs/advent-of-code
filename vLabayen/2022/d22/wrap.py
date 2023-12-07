@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 from attrs import define, field
 from data_models import Coordinate, Tile
-from cube_hell import Point3D, Cube3D, group_by_cube_face, get_neighbours, unwrap
+from cube_hell import Point3D, Cube3D, group_by_cube_face, get_neighbours, get_matching_points, unwrap
 from collections import defaultdict
 import math
 from abc import ABC, abstractmethod
@@ -71,7 +71,7 @@ class CubeWrapper(Wrapper):
 		starting_face = next(iter(faces.values()))
 		cube = Cube3D([Point3D(*p.position, z) for p in starting_face.points for z in {0, 1}])
 
-		print(starting_face, [point for point in cube.points if point.current_z == 0])
+		print(starting_face, get_matching_points(cube))
 		neighbour_faces = get_neighbours(starting_face.position, faces)
 		for neighbour, direction in neighbour_faces:
 			for face, points in unwrap(neighbour, direction, cube, faces):
