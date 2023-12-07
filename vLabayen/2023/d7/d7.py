@@ -1,11 +1,11 @@
 import logging
-from typing import List, Iterable, Tuple
+from typing import List, Iterable, Tuple, Dict
 from enum import Enum
 from attrs import define, field, Factory
 from collections import Counter
 
-named_cards = {'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10}
-def parse_card(value: str) -> int:
+
+def parse_card(value: str, named_cards: Dict[str, int]) -> int:
 	return named_cards.get(value) or int(value)
 
 class HandType(Enum):
@@ -37,22 +37,22 @@ class Hand:
 	bid  : int
 	type : HandType = field(init=False, default=Factory(lambda self: HandType.get_type(self.cards), takes_self=True))	# type: ignore
 
-def read_file(file: str) -> Iterable[Hand]:
+def read_file(file: str, named_cards: Dict[str, int]) -> Iterable[Hand]:
 	with open(file, 'r') as f:
 		for line in (l.strip() for l in f):
 			cards, bid = line.split(' ')
 			yield Hand(
-				cards = tuple(parse_card(c) for c in cards),
+				cards = tuple(parse_card(c, named_cards) for c in cards),
 				bid = int(bid)
 			)
 
 def p1(args):
-	hands = read_file(args.file)
+	hands = read_file(args.file, {'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10})
 	sorted_hands = sorted(hands, key = lambda hand: (hand.type.value, *hand.cards))
 	print(sum((i + 1) * hand.bid for i, hand in enumerate(sorted_hands)))
 
 def p2(args):
-	_ = read_file(args.file)
+	_ = read_file(args.file, {'A': 14, 'K': 13, 'Q': 12, 'J': 1, 'T': 10})
 
 if __name__ == '__main__':
 	import argparse
