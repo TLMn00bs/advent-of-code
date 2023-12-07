@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 from attrs import define, field
 from data_models import Coordinate, Tile
-from cube_hell import Point3D, Cube3D, group_by_cube_face, get_neighbours, get_matching_points, unwrap
+from cube_hell import group_by_cube_face, unwrap
 from collections import defaultdict
 import math
 from abc import ABC, abstractmethod
@@ -67,10 +67,8 @@ class CubeWrapper(Wrapper):
 
 	def __attrs_post_init__(self):
 		faces = {face.position: face for face in group_by_cube_face(self.tiles)}
-
-		for face, points in unwrap(faces):
-			print(face, points)
-
+		points = {face.position: points for face, points in unwrap(faces)}
+		
 
 	def get_right(self, tile: Tile) -> Tile:
 		...
