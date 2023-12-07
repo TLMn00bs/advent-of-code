@@ -20,15 +20,16 @@ class HandType(Enum):
 	@staticmethod
 	def get_type(cards: Iterable[int]) -> 'HandType':
 		cards_count = Counter(cards)
+		num_unique_cards = len(cards_count)
 		(_, max_repeat), = cards_count.most_common(1)
 
-		if len(cards_count) == 5: return HandType.HIGH_CARD
-		if len(cards_count) == 4: return HandType.ONE_PAIR
-		if len(cards_count) == 3 and max_repeat == 3: return HandType.THREE_OF_A_KIND
-		if len(cards_count) == 3 and max_repeat == 2: return HandType.TWO_PAIR
-		if len(cards_count) == 2 and max_repeat == 4: return HandType.FOUR_OF_A_KIND
-		if len(cards_count) == 2 and max_repeat == 3: return HandType.FULL_HOUSE
-		if len(cards_count) == 1: return HandType.FIVE_OF_A_KIND
+		if num_unique_cards == 5: return HandType.HIGH_CARD
+		if num_unique_cards == 4: return HandType.ONE_PAIR
+		if num_unique_cards == 3 and max_repeat == 3: return HandType.THREE_OF_A_KIND
+		if num_unique_cards == 3 and max_repeat == 2: return HandType.TWO_PAIR
+		if num_unique_cards == 2 and max_repeat == 4: return HandType.FOUR_OF_A_KIND
+		if num_unique_cards == 2 and max_repeat == 3: return HandType.FULL_HOUSE
+		if num_unique_cards == 1: return HandType.FIVE_OF_A_KIND
 		raise ValueError(f'Unknown hand type: {cards_count=}, {max_repeat=}')
 
 @define
