@@ -68,14 +68,8 @@ class CubeWrapper(Wrapper):
 	def __attrs_post_init__(self):
 		faces = {face.position: face for face in group_by_cube_face(self.tiles)}
 
-		starting_face = next(iter(faces.values()))
-		cube = Cube3D([Point3D(*p.position, z) for p in starting_face.points for z in {0, 1}])
-
-		print(starting_face, get_matching_points(cube))
-		neighbour_faces = get_neighbours(starting_face.position, faces)
-		for neighbour, direction in neighbour_faces:
-			for face, points in unwrap(neighbour, direction, cube, faces):
-				print(face, points)
+		for face, points in unwrap(faces):
+			print(face, points)
 
 
 	def get_right(self, tile: Tile) -> Tile:

@@ -1,4 +1,4 @@
-from typing import Tuple, List, Callable, Tuple, Iterable, Dict
+from typing import Tuple, List, Callable, Tuple, Iterable, Dict, Optional
 from attrs import define, field, Factory
 from data_models import Coordinate, Tile, Facing
 from collections import defaultdict
@@ -145,11 +145,21 @@ def get_neighbours(face_position: Coordinate, faces: Dict[Coordinate, Face]) -> 
 def get_matching_points(cube: Cube3D) -> List[Point3D]:
 	return [point for point in cube.points if point.current_z == 0]
 
-def unwrap(towards: Face, direction: Facing, cube: Cube3D, faces: Dict[Coordinate, Face]) -> Iterable[Tuple[Face, List[Point3D]]]:
+def unwrap(faces: Dict[Coordinate, Face]) -> Iterable[Tuple[Face, List[Point3D]]]:
+	starting_face = next(iter(faces.values()))
+	cube = Cube3D([Point3D(*p.position, z) for p in starting_face.points for z in {0, 1}])
+
+	yield starting_face, get_matching_points(cube)
+
+	for next_face, next_direction in get_neighbours(starting_face.position, faces):
+		for face, points in rotate_and_unwrap(next_face, next_direction, cube, faces):
+			yield face, points
+
+def rotate_and_unwrap(towards: Face, direction: Facing, cube: Cube3D, faces: Dict[Coordinate, Face]) -> Iterable[Tuple[Face, List[Point3D]]]:
 	rotated_cube = cube.rotate(direction)
 
 	yield (towards, get_matching_points(rotated_cube))
 	for next_face, next_direction in get_neighbours(towards.position, faces):
 		if next_direction == direction.oposing_direction(): continue
-		for face, points in unwrap(next_face, next_direction, rotated_cube, faces):
+		for face, points in rotate_and_unwrap(next_face, next_direction, rotated_cube, faces):
 			yield face, points
