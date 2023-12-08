@@ -31,12 +31,12 @@ def read_file(file: str) -> Tuple[List[Step], List[Node]]:
 
 def p1(args):
 	steps, nodes = read_file(args.file)
-	steps_network = {node.name: node for node in nodes}
+	nodes_network = {node.name: node for node in nodes}
 
-	current_node = steps_network['AAA']
+	current_node = nodes_network['AAA']
 	for i, step in enumerate(steps_gen(steps)):
 		next_node_name = current_node.right if step == Step.RIGHT else current_node.left
-		current_node = steps_network[next_node_name]
+		current_node = nodes_network[next_node_name]
 
 		if current_node.name == 'ZZZ': break
 	
