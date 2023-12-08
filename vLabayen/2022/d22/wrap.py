@@ -79,8 +79,6 @@ class LinearWrapper(Wrapper):
 
 @define
 class CubeWrapper(Wrapper):
-	tiles: Dict[Coordinate, Tile]
-
 	side_size: int = field(init=False, repr=False)
 	edges: Dict[Tuple[Coordinate, Facing], Edge] = field(init=False, factory=dict)
 	def __attrs_post_init__(self):
@@ -93,21 +91,22 @@ class CubeWrapper(Wrapper):
 			self.edges[(edge.face_2_position, edge.face_2_border)] = edge
 
 
-	def wrap_up(self, position: Coordinate) -> Coordinate:
+	def wrap_right(self, position: Coordinate) -> Tuple[Coordinate, Facing]:
+		face_position = Face.get_coordinate(position, self.side_size)
+		edge = self.edges[(face_position, Facing.RIGHT)]
+		return edge.wrap(position, face_position)
+
+	def wrap_left(self, position: Coordinate) -> Tuple[Coordinate, Facing]:
+		face_position = Face.get_coordinate(position, self.side_size)
+		edge = self.edges[(face_position, Facing.LEFT)]
+		return edge.wrap(position, face_position)
+
+	def wrap_down(self, position: Coordinate) -> Tuple[Coordinate, Facing]:
+		face_position = Face.get_coordinate(position, self.side_size)
+		edge = self.edges[(face_position, Facing.DOWN)]
+		return edge.wrap(position, face_position)
+
+	def wrap_up(self, position: Coordinate) -> Tuple[Coordinate, Facing]:
 		face_position = Face.get_coordinate(position, self.side_size)
 		edge = self.edges[(face_position, Facing.UP)]
-		new_position, new_facing = edge.wrap(position, face_position)
-
-
-	def get_right(self, tile: Tile) -> Tile:
-		...
-
-	def get_left(self, tile: Tile) -> Tile:
-		...
-
-	def get_down(self, tile: Tile) -> Tile:
-		...
-
-	def get_up(self, tile: Tile) -> Tile:
-		x, y = tile.position
-		return self.tiles.get((x, y - 1)) or self.tiles[self.wrap_up(tile.position)]
+		return edge.wrap(position, face_position)
