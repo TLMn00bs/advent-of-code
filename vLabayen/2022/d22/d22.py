@@ -24,6 +24,17 @@ def p2(args):
 	tiles, path = read_file(args.file)
 
 	wrapper = CubeWrapper({tile.position: tile for tile in tiles})
+	current_tile = top_left_tile(tiles)
+	facing = Facing.RIGHT
+
+	# print(current_tile.position, facing)
+	for step in path.steps:
+		current_tile, facing = apply_step(current_tile, facing, step, wrapper)
+		# print(current_tile.position, facing)
+
+	column, row = current_tile.position
+	print((1000 * row) + (4 * column) + facing.value)
+
 
 if __name__ == '__main__':
 	import argparse
