@@ -1,4 +1,4 @@
-from typing import Tuple, List, Callable, Tuple, Iterable, Dict, Optional, FrozenSet
+from typing import Tuple, List, Callable, Tuple, Iterable, Dict, FrozenSet
 from attrs import define, field, Factory
 from data_models import Coordinate, Tile, Facing
 from collections import defaultdict

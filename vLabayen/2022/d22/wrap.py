@@ -1,6 +1,6 @@
 from typing import Dict, Tuple
 from attrs import define, field
-from data_models import Coordinate, Tile, Facing
+from data_models import Coordinate, Tile
 from cube_hell import Face, group_by_cube_face, unwrap, get_edges
 from collections import defaultdict
 import math
