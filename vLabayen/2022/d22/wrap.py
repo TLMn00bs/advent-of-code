@@ -68,11 +68,11 @@ class CubeWrapper(Wrapper):
 	side_size: int = field(init=False, repr=False)
 	edges: Dict[Tuple[Coordinate, Facing], Edge] = field(init=False, factory=dict)
 	def __attrs_post_init__(self):
-		side_size = int(math.sqrt(len(self.tiles) / 6))
+		self.side_size = int(math.sqrt(len(self.tiles) / 6))
 
-		faces = {face.position: face for face in group_by_cube_face(self.tiles, side_size)}
+		faces = {face.position: face for face in group_by_cube_face(self.tiles, self.side_size)}
 		points = {face.position: points for face, points in unwrap(faces)}
-		for edge in get_edges(points, side_size):
+		for edge in get_edges(points, self.side_size):
 			self.edges[(edge.face_1_position, edge.face_1_border)] = edge
 			self.edges[(edge.face_2_position, edge.face_2_border)] = edge
 

@@ -231,10 +231,10 @@ class Edge:
 		x, y = p.current_x * self.side_size, p.current_y * self.side_size
 
 		# Since corner points are shared between faces, the above scaling to the source map scale does not correcly
-		# compute the real position of the points in the face if they are at the right or bottom.
-		# For those cases, just decrement by 1 in the position to return to our current face.
-		if x // self.side_size != face_x: x -= 1
-		if y // self.side_size != face_y: y -= 1
+		# compute the real position of the points in the face if they are at the left or top.
+		# For those cases, just increment by 1 in the position to return to our current face.
+		if x // self.side_size == face_x: x += 1
+		if y // self.side_size == face_y: y += 1
 
 		return x, y
 
