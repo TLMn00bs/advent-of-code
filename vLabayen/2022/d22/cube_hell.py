@@ -297,7 +297,7 @@ def get_edges(points: Dict[Coordinate, List[Point3D]], side_size: int) -> Iterab
 			edge_key = frozenset((p1.starting_position, p2.starting_position))
 			edges[edge_key].append({
 				'points': (p1, p2),
-				'face_position': face_position,
+				'position': face_position,
 				'border': get_edge_border(p1, p2, max_x, min_x, max_y, min_y),
 			})
 
