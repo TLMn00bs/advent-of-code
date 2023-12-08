@@ -1,4 +1,4 @@
-from typing import Tuple, List, Callable, Tuple, Iterable, Dict, FrozenSet
+from typing import Tuple, List, Callable, Tuple, Iterable, Dict, FrozenSet, Literal
 from attrs import define, field, Factory
 from data_models import Coordinate, Tile, Facing
 from collections import defaultdict
@@ -209,8 +209,79 @@ class Edge:
 	face_2_border: Facing
 	side_size: int
 
+	wrap_info: Dict[Coordinate, Tuple[
+		Callable[[Coordinate], Tuple[int, int]],
+		Callable[[Tuple[int, int]], Coordinate],
+		Facing
+	]] = field(init=False, factory=dict)
+
+
+	@staticmethod
+	def _get_direction(p_ref: Point3D, p_other: Point3D, border: Facing) -> Literal[1, -1]:
+		''' Get whether the direction to p_ref to p_other is positive or negative in the border, as 1 or -1 '''
+		if border == Facing.UP or border == Facing.DOWN:
+			return 1 if p_other.current_x - p_ref.current_x > 0 else -1
+		if border == Facing.LEFT or border == Facing.RIGHT:
+			return 1 if p_other.current_y - p_ref.current_y > 0 else -1
+
+		raise
+
+	def _point3d_to_map(self, p: Point3D, face_position: Coordinate) -> Coordinate:
+		face_x, face_y = face_position
+		x, y = p.current_x * self.side_size, p.current_y * self.side_size
+
+		# Since corner points are shared between faces, the above scaling to the source map scale does not correcly
+		# compute the real position of the points in the face if they are at the right or bottom.
+		# For those cases, just decrement by 1 in the position to return to our current face.
+		if x // self.side_size != face_x: x -= 1
+		if y // self.side_size != face_y: y -= 1
+
+		return x, y
+
+	@staticmethod
+	def _compile_get_distance(ref: Coordinate) -> Callable[[Coordinate], Tuple[int, int]]:
+		ref_x, ref_y = ref
+		def get_distance(tile_position: Coordinate) -> Tuple[int, int]:
+			x, y = tile_position
+			return abs(x - ref_x), abs(y - ref_y)
+
+		return get_distance
+
+	@staticmethod
+	def _compile_apply_distance(ref: Coordinate, direction: Literal[1, -1]) -> Callable[[Tuple[int, int]], Coordinate]:
+		ref_x, ref_y = ref
+		def apply_distance(distance: Tuple[int, int]) -> Coordinate:
+			distance_x, distance_y = distance
+			return ref_x + (distance_x * direction), ref_y + (distance_y * direction)
+
+		return apply_distance
+
+	def __attrs_post_init__(self):
+		p1_ref, p1_other = self.face_1_points
+		border_1_direction = Edge._get_direction(p1_ref, p1_other, self.face_1_border)
+
+		order_matched = 1 if p1_ref.starting_position == self.face_2_points[0].starting_position else -1
+		p2_ref, p2_other = self.face_2_points[::order_matched]
+		border_2_direction = Edge._get_direction(p2_ref, p2_other, self.face_2_border)
+
+		p1_ref_map = self._point3d_to_map(p1_ref, self.face_1_position)
+		p2_ref_map = self._point3d_to_map(p2_ref, self.face_2_position)
+
+		self.wrap_info[self.face_1_position] = (
+			Edge._compile_get_distance(p1_ref_map),
+			Edge._compile_apply_distance(p2_ref_map, border_2_direction),
+			self.face_2_border.oposing_direction()
+		)
+		self.wrap_info[self.face_2_position] = (
+			Edge._compile_get_distance(p2_ref_map),
+			Edge._compile_apply_distance(p1_ref_map, border_1_direction),
+			self.face_1_border.oposing_direction()
+		)
+
 	def wrap(self, tile_position: Coordinate, face_position: Coordinate) -> Tuple[Coordinate, Facing]:
-		pass
+		get_distance_to_src, apply_distance_from_dst, new_facing = self.wrap_info[face_position]
+		return apply_distance_from_dst(get_distance_to_src(tile_position)), new_facing
+
 
 def get_edges(points: Dict[Coordinate, List[Point3D]], side_size: int) -> Iterable[Edge]:
 	''' Compute the edges of each face '''
