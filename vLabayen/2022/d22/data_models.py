@@ -29,6 +29,10 @@ class Facing(Enum):
 
 	def oposing_direction(self) -> 'Facing':
 		return Facing((self.value + 2) % 4)
+	
+	@property
+	def axis(self) -> Literal['vertical', 'horizontal']:
+		return 'vertical' if self.value % 2 == 1 else 'horizontal'
 
 @define
 class Tile:

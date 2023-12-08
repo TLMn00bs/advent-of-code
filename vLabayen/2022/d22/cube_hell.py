@@ -248,10 +248,10 @@ class Edge:
 		return get_distance
 
 	@staticmethod
-	def _compile_apply_distance(ref: Coordinate, direction: Literal[1, -1]) -> Callable[[Tuple[int, int]], Coordinate]:
+	def _compile_apply_distance(ref: Coordinate, direction: Literal[1, -1], flip_axis: bool) -> Callable[[Tuple[int, int]], Coordinate]:
 		ref_x, ref_y = ref
 		def apply_distance(distance: Tuple[int, int]) -> Coordinate:
-			distance_x, distance_y = distance
+			distance_x, distance_y = distance[::(-1 if flip_axis else 1)]
 			return ref_x + (distance_x * direction), ref_y + (distance_y * direction)
 
 		return apply_distance
@@ -264,17 +264,18 @@ class Edge:
 		p2_ref, p2_other = self.face_2_points[::order_matched]
 		border_2_direction = Edge._get_direction(p2_ref, p2_other, self.face_2_border)
 
+		flip_axis = self.face_1_border.axis != self.face_2_border.axis
 		p1_ref_map = self._point3d_to_map(p1_ref, self.face_1_position)
 		p2_ref_map = self._point3d_to_map(p2_ref, self.face_2_position)
 
 		self.wrap_info[self.face_1_position] = (
 			Edge._compile_get_distance(p1_ref_map),
-			Edge._compile_apply_distance(p2_ref_map, border_2_direction),
+			Edge._compile_apply_distance(p2_ref_map, border_2_direction, flip_axis),
 			self.face_2_border.oposing_direction()
 		)
 		self.wrap_info[self.face_2_position] = (
 			Edge._compile_get_distance(p2_ref_map),
-			Edge._compile_apply_distance(p1_ref_map, border_1_direction),
+			Edge._compile_apply_distance(p1_ref_map, border_1_direction, flip_axis),
 			self.face_1_border.oposing_direction()
 		)
 
