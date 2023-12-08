@@ -50,6 +50,21 @@ class RotationInfo:
 
 @define
 class Cube3D:
+	'''
+	When a cube is rotated over the axis of C, both perpendicular faces to that axis move equal.
+	The adyacent corners to C just move diagonally towards the advance direction.
+	The oposing corner to C just move towards.
+	C just does not move, since it's the origin of the rotation.
+
+	A--B 		D--A
+	|  | ---->  |  |
+	D--C		B--C
+
+	Visualizing the starting and ending cube touching..
+	A--*--A			*--D--*			*--B--*
+	|  |  |			|  |  |			|  |  |
+	*--C--*			D--C--*			*--C--B
+	'''
 	points: List[Point3D]
 
 	def _rotation_info(self, direction: Facing) -> RotationInfo:
