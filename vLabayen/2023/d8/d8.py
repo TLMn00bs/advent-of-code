@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
 from attrs import define
 from enum import Enum
 import re
@@ -8,9 +8,10 @@ class Step(Enum):
 	LEFT  = 'L'
 	RIGHT = 'R'
 
-def steps_gen(steps: List[Step]):
+def steps_gen(steps: List[Step]) -> Iterable[Tuple[int, Step]]:
 	while True:
-		for step in steps: yield step
+		for i, step in enumerate(steps):
+			yield i, step
 
 @define
 class Node:
@@ -34,7 +35,7 @@ def p1(args):
 	nodes_network = {node.name: node for node in nodes}
 
 	current_node = nodes_network['AAA']
-	for i, step in enumerate(steps_gen(steps)):
+	for i, (_, step) in enumerate(steps_gen(steps)):
 		next_node_name = current_node.right if step == Step.RIGHT else current_node.left
 		current_node = nodes_network[next_node_name]
 
