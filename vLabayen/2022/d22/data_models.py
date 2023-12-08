@@ -19,6 +19,8 @@ class Facing(Enum):
 	LEFT  = 2
 	UP    = 3
 
+	def __repr__(self) -> str: return self.name
+
 	def rotate_clockwise(self) -> 'Facing':
 		return Facing((self.value + 1) % 4)
 	
