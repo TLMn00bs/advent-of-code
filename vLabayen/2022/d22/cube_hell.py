@@ -3,6 +3,8 @@ from attrs import define, field, Factory
 from data_models import Coordinate, Tile, Facing
 from collections import defaultdict
 
+Coordinate3D = Tuple[int, int, int]
+
 @define
 class Point:
 	position: Coordinate
@@ -27,15 +29,15 @@ class Point3D:
 	current_z: int = field(repr=True, default=Factory(lambda self: self.z, takes_self=True))
 
 	@property
-	def starting_position(self) -> Tuple[int, int, int]:
-		return self.x, self.y, self.x
+	def starting_position(self) -> Coordinate3D:
+		return self.x, self.y, self.z
 
 	@property
-	def current_position(self) -> Tuple[int, int, int]:
+	def current_position(self) -> Coordinate3D:
 		return self.current_x, self.current_y, self.current_z
 
 	@current_position.setter
-	def current_position(self, value: Tuple[int, int, int]):
+	def current_position(self, value: Coordinate3D):
 		self.current_x, self.current_y, self.current_z = value
 
 	def copy(self) -> 'Point3D':
