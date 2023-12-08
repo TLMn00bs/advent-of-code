@@ -3,7 +3,7 @@ from data_models import Tile, TileType, Facing, Step
 from wrap import Wrapper
 
 
-def get_next(tile: Tile, facing: Facing, wrapper: Wrapper) -> Tile:
+def get_next(tile: Tile, facing: Facing, wrapper: Wrapper) -> Tuple[Tile, Facing]:
 	if facing == Facing.RIGHT: return wrapper.get_right(tile)
 	if facing == Facing.LEFT : return wrapper.get_left(tile)
 	if facing == Facing.DOWN : return wrapper.get_down(tile)
@@ -15,9 +15,9 @@ def apply_step(tile: Tile, facing: Facing, step: Step, wrapper: Wrapper) -> Tupl
 	if step == 'L': return tile, facing.rotate_counterclockwise()
 
 	for _ in range(step):
-		next = get_next(tile, facing, wrapper)
-		if next.type == TileType.WALL: return tile, facing
-		tile = next
+		next_tile, next_facing = get_next(tile, facing, wrapper)
+		if next_tile.type == TileType.WALL: return tile, facing
+		tile, facing = next_tile, next_facing
 	
 	return tile, facing
 

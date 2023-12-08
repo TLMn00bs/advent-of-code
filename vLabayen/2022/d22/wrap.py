@@ -6,20 +6,53 @@ from collections import defaultdict
 import math
 from abc import ABC, abstractmethod
 
+@define
 class Wrapper(ABC):
+	tiles: Dict[Coordinate, Tile]
+
 	@abstractmethod
-	def get_right(self, tile: Tile) -> Tile: ...
+	def wrap_right(self, tile: Coordinate) -> Tuple[Coordinate, Facing]: ...
 	@abstractmethod
-	def get_left (self, tile: Tile) -> Tile: ...
+	def wrap_left (self, tile: Coordinate) -> Tuple[Coordinate, Facing]: ...
 	@abstractmethod
-	def get_down (self, tile: Tile) -> Tile: ...
+	def wrap_down (self, tile: Coordinate) -> Tuple[Coordinate, Facing]: ...
 	@abstractmethod
-	def get_up   (self, tile: Tile) -> Tile: ...
+	def wrap_up   (self, tile: Coordinate) -> Tuple[Coordinate, Facing]: ...
+
+	def get_right(self, tile: Tile) -> Tuple[Tile, Facing]:
+		x, y = tile.position
+		next_tile = self.tiles.get((x + 1, y), None)
+		if next_tile is not None: return next_tile, Facing.RIGHT
+		
+		next_tile_position, next_facing = self.wrap_right(tile.position)
+		return self.tiles[next_tile_position], next_facing
+
+	def get_left(self, tile: Tile) -> Tuple[Tile, Facing]:
+		x, y = tile.position
+		next_tile = self.tiles.get((x - 1, y), None)
+		if next_tile is not None: return next_tile, Facing.LEFT
+		
+		next_tile_position, next_facing = self.wrap_left(tile.position)
+		return self.tiles[next_tile_position], next_facing
+
+	def get_down(self, tile: Tile) -> Tuple[Tile, Facing]:
+		x, y = tile.position
+		next_tile = self.tiles.get((x, y + 1), None)
+		if next_tile is not None: return next_tile, Facing.DOWN
+		
+		next_tile_position, next_facing = self.wrap_down(tile.position)
+		return self.tiles[next_tile_position], next_facing
+
+	def get_up(self, tile: Tile) -> Tuple[Tile, Facing]:
+		x, y = tile.position
+		next_tile = self.tiles.get((x, y - 1), None)
+		if next_tile is not None: return next_tile, Facing.UP
+		
+		next_tile_position, next_facing = self.wrap_up(tile.position)
+		return self.tiles[next_tile_position], next_facing
 
 @define
 class LinearWrapper(Wrapper):
-	tiles: Dict[Coordinate, Tile]
-
 	row_edges: Dict[int, Tuple[int, int]] = field(init=False, factory=lambda: defaultdict(lambda: (math.inf, -math.inf)))
 	col_edges: Dict[int, Tuple[int, int]] = field(init=False, factory=lambda: defaultdict(lambda: (math.inf, -math.inf)))
 	def __attrs_post_init__(self):
@@ -27,38 +60,21 @@ class LinearWrapper(Wrapper):
 			self.row_edges[y] = (min(self.row_edges[y][0], x), max(self.row_edges[y][1], x))
 			self.col_edges[x] = (min(self.col_edges[x][0], y), max(self.col_edges[x][1], y))
 
-	def wrap_right(self, position: Coordinate) -> Coordinate:
+	def wrap_right(self, position: Coordinate) -> Tuple[Coordinate, Facing]:
 		_, y = position
-		return (self.row_edges[y][0], y)
+		return (self.row_edges[y][0], y), Facing.RIGHT
 
-	def wrap_left(self, position: Coordinate) -> Coordinate:
+	def wrap_left(self, position: Coordinate) -> Tuple[Coordinate, Facing]:
 		_, y = position
-		return (self.row_edges[y][1], y)
+		return (self.row_edges[y][1], y), Facing.LEFT
 
-	def wrap_down(self, position: Coordinate) -> Coordinate:
+	def wrap_down(self, position: Coordinate) -> Tuple[Coordinate, Facing]:
 		x, _ = position
-		return (x, self.col_edges[x][0])
+		return (x, self.col_edges[x][0]), Facing.DOWN
 
-	def wrap_up(self, position: Coordinate) -> Coordinate:
+	def wrap_up(self, position: Coordinate) -> Tuple[Coordinate, Facing]:
 		x, _ = position
-		return (x, self.col_edges[x][1])
-
-
-	def get_right(self, tile: Tile) -> Tile:
-		x, y = tile.position
-		return self.tiles.get((x + 1, y)) or self.tiles[self.wrap_right(tile.position)]
-
-	def get_left(self, tile: Tile) -> Tile:
-		x, y = tile.position
-		return self.tiles.get((x - 1, y)) or self.tiles[self.wrap_left(tile.position)]
-
-	def get_down(self, tile: Tile) -> Tile:
-		x, y = tile.position
-		return self.tiles.get((x, y + 1)) or self.tiles[self.wrap_down(tile.position)]
-
-	def get_up(self, tile: Tile) -> Tile:
-		x, y = tile.position
-		return self.tiles.get((x, y - 1)) or self.tiles[self.wrap_up(tile.position)]
+		return (x, self.col_edges[x][1]), Facing.UP
 
 
 @define
