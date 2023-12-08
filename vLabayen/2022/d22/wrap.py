@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 from attrs import define, field
 from data_models import Coordinate, Tile, Facing
-from cube_hell import Face, group_by_cube_face, unwrap
+from cube_hell import Face, group_by_cube_face, unwrap, get_edges
 from collections import defaultdict
 import math
 from abc import ABC, abstractmethod
@@ -72,6 +72,8 @@ class CubeWrapper(Wrapper):
 
 		self.faces = {face.position: face for face in group_by_cube_face(self.tiles, side_size)}
 		points = {face.position: points for face, points in unwrap(self.faces)}
+		edges = get_edges(points)
+
 
 	def wrap_up(self, position: Coordinate) -> Coordinate:
 		face = self.faces[Face.get_coordinate(position, self.side_size)]

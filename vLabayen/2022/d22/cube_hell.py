@@ -1,7 +1,8 @@
-from typing import Tuple, List, Callable, Tuple, Iterable, Dict, Optional
+from typing import Tuple, List, Callable, Tuple, Iterable, Dict, Optional, FrozenSet
 from attrs import define, field, Factory
 from data_models import Coordinate, Tile, Facing
 from collections import defaultdict
+from itertools import combinations
 
 Coordinate3D = Tuple[int, int, int]
 
@@ -177,3 +178,55 @@ def unwrap(faces: Dict[Coordinate, Face]) -> Iterable[Tuple[Face, List[Point3D]]
 	for next_face, next_direction in get_neighbours(starting_face.position, faces):
 		for face, points in rotate_and_unwrap(next_face, next_direction, cube, faces):
 			yield face, points
+
+
+def are_adyacent(p1: Coordinate3D, p2: Coordinate3D) -> bool:
+	''' Return whether a pair of points are adyacent '''
+	are_same_coordinate = [c1 == c2 for c1, c2 in zip(p1, p2)]
+	return are_same_coordinate.count(True) == 2
+
+def get_edge_points(points: List[Point3D]) -> Iterable[Tuple[Point3D, Point3D]]:
+	''' Return the pair of points that make up a edge '''
+	for p1, p2 in combinations(points, 2):
+		if are_adyacent(p1.current_position, p2.current_position): yield p1, p2
+
+def get_edge_border(p1: Point3D, p2: Point3D, max_x: int, min_x: int, max_y: int, min_y: int) -> Facing:
+	''' Get which is the border of the face were the points are at '''
+	if p1.current_x == p2.current_x == max_x: return Facing.RIGHT
+	if p1.current_x == p2.current_x == min_x: return Facing.LEFT
+	if p1.current_y == p2.current_y == max_y: return Facing.DOWN
+	if p1.current_y == p2.current_y == min_y: return Facing.UP
+	raise
+
+
+@define
+class Edge:
+	face_1_position: Coordinate
+	face_1_points: Tuple[Point3D, Point3D]
+	face_1_border: Facing
+	face_2_position: Coordinate
+	face_2_points: Tuple[Point3D, Point3D]
+	face_2_border: Facing
+
+def get_edges(points: Dict[Coordinate, List[Point3D]]) -> Iterable[Edge]:
+	''' Compute the edges of each face '''
+	edges: Dict[FrozenSet[Coordinate3D], List[dict]] = defaultdict(lambda: [])
+
+	for face_position, face_points in points.items():
+		max_x = max(p.current_x for p in face_points)
+		min_x = min(p.current_x for p in face_points)
+		max_y = max(p.current_y for p in face_points)
+		min_y = min(p.current_y for p in face_points)
+
+		for p1, p2 in get_edge_points(face_points):
+			edge_key = frozenset((p1.starting_position, p2.starting_position))
+			edges[edge_key].append({
+				'points': (p1, p2),
+				'face_position': face_position,
+				'border': get_edge_border(p1, p2, max_x, min_x, max_y, min_y),
+			})
+
+	for (face_1, face_2) in edges.values(): yield Edge(
+		face_1_position = face_1['position'], face_1_points = face_1['points'], face_1_border = face_1['border'],
+		face_2_position = face_2['position'], face_2_points = face_2['points'], face_2_border = face_2['border'],
+	)
