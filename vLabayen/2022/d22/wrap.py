@@ -72,7 +72,7 @@ class CubeWrapper(Wrapper):
 
 		faces = {face.position: face for face in group_by_cube_face(self.tiles, side_size)}
 		points = {face.position: points for face, points in unwrap(faces)}
-		for edge in get_edges(points):
+		for edge in get_edges(points, side_size):
 			self.edges[(edge.face_1_position, edge.face_1_border)] = edge
 			self.edges[(edge.face_2_position, edge.face_2_border)] = edge
 

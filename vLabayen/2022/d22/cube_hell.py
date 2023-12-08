@@ -207,11 +207,12 @@ class Edge:
 	face_2_position: Coordinate
 	face_2_points: Tuple[Point3D, Point3D]
 	face_2_border: Facing
+	side_size: int
 
 	def wrap(self, tile_position: Coordinate, face_position: Coordinate) -> Tuple[Coordinate, Facing]:
 		pass
 
-def get_edges(points: Dict[Coordinate, List[Point3D]]) -> Iterable[Edge]:
+def get_edges(points: Dict[Coordinate, List[Point3D]], side_size: int) -> Iterable[Edge]:
 	''' Compute the edges of each face '''
 	edges: Dict[FrozenSet[Coordinate3D], List[dict]] = defaultdict(lambda: [])
 
@@ -232,4 +233,5 @@ def get_edges(points: Dict[Coordinate, List[Point3D]]) -> Iterable[Edge]:
 	for (face_1, face_2) in edges.values(): yield Edge(
 		face_1_position = face_1['position'], face_1_points = face_1['points'], face_1_border = face_1['border'],
 		face_2_position = face_2['position'], face_2_points = face_2['points'], face_2_border = face_2['border'],
+		side_size = side_size
 	)
