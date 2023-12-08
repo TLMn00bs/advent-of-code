@@ -1,8 +1,14 @@
 import logging
-from typing import List, Tuple, Iterable
+from typing import List, Tuple, Iterable, Dict
 from attrs import define
 from enum import Enum
 import re
+from itertools import takewhile
+from functools import reduce
+from math import gcd
+
+def lcm(numbers: Iterable[int]) -> int:
+	return reduce(lambda a, b: a * b // gcd(a, b), numbers)
 
 class Step(Enum):
 	LEFT  = 'L'
@@ -43,8 +49,34 @@ def p1(args):
 	
 	print(i + 1)	# type: ignore
 
+
+def detect_loop_frequency(node: Node, steps: List[Step], nodes_network: Dict[str, Node]) -> int:
+	visited_nodes: Dict[Tuple[str, int], int] = {}
+	current_node = node
+
+	for i, (step_idx, step) in enumerate(steps_gen(steps)):
+		key = (current_node.name, step_idx)
+
+		past_visit = visited_nodes.get(key, None)
+		if past_visit is not None:
+			return i - past_visit
+		visited_nodes[key] = i
+
+		next_node_name = current_node.right if step == Step.RIGHT else current_node.left
+		current_node = nodes_network[next_node_name]
+
+	raise
+
 def p2(args):
-	_ = read_file(args.file)
+	steps, nodes = read_file(args.file)
+	nodes_network = {node.name: node for node in nodes}
+
+	ending_A_nodes = [node for node in nodes if node.name.endswith('A')]
+	nodes_cycle_freq = {node.name: detect_loop_frequency(node, steps, nodes_network) for node in ending_A_nodes}
+
+	# As far a I can think, there is no hard requirement for the ending-Z nodes to be located exactly at the cycle freq
+	# nevertheless, that's seems that be what happens in the example & my input.
+	print(lcm(freq for freq in nodes_cycle_freq.values()))
 
 if __name__ == '__main__':
 	import argparse
