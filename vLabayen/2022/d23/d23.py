@@ -51,39 +51,39 @@ class SoilMap:
 		for x, y in self.elves: self.inner_update(x, y)
 
 	def inner_update(self, x: int, y: int):
-		has_neighbours = any((
-			(x - 1, y - 1) in self.elves,
-			(x    , y - 1) in self.elves,
-			(x + 1, y - 1) in self.elves,
-			(x - 1, y    ) in self.elves,
-			(x + 1, y    ) in self.elves,
-			(x - 1, y + 1) in self.elves,
-			(x    , y + 1) in self.elves,
-			(x + 1, y + 1) in self.elves,
-		))
+		has_neighbours = (
+			(x - 1, y - 1) in self.elves or
+			(x    , y - 1) in self.elves or
+			(x + 1, y - 1) in self.elves or
+			(x - 1, y    ) in self.elves or
+			(x + 1, y    ) in self.elves or
+			(x - 1, y + 1) in self.elves or
+			(x    , y + 1) in self.elves or
+			(x + 1, y + 1) in self.elves
+		)
 		self.has_neighbours[(x, y)] = has_neighbours
 		if not has_neighbours: return
 
-		self.should_move_north[(x, y)] = not any((
-			(x - 1, y - 1) in self.elves,
-			(x    , y - 1) in self.elves,
-			(x + 1, y - 1) in self.elves,
-		))
-		self.should_move_south[(x, y)] = not any((
-			(x - 1, y + 1) in self.elves,
-			(x    , y + 1) in self.elves,
-			(x + 1, y + 1) in self.elves,
-		))
-		self.should_move_west[(x, y)] = not any((
-			(x - 1, y - 1) in self.elves,
-			(x - 1, y    ) in self.elves,
-			(x - 1, y + 1) in self.elves,
-		))
-		self.should_move_east[(x, y)] = not any((
-			(x + 1, y - 1) in self.elves,
-			(x + 1, y    ) in self.elves,
-			(x + 1, y + 1) in self.elves,
-		))
+		self.should_move_north[(x, y)] = not (
+			(x - 1, y - 1) in self.elves or
+			(x    , y - 1) in self.elves or
+			(x + 1, y - 1) in self.elves
+		)
+		self.should_move_south[(x, y)] = not (
+			(x - 1, y + 1) in self.elves or
+			(x    , y + 1) in self.elves or
+			(x + 1, y + 1) in self.elves
+		)
+		self.should_move_west[(x, y)] = not (
+			(x - 1, y - 1) in self.elves or
+			(x - 1, y    ) in self.elves or
+			(x - 1, y + 1) in self.elves
+		)
+		self.should_move_east[(x, y)] = not (
+			(x + 1, y - 1) in self.elves or
+			(x + 1, y    ) in self.elves or
+			(x + 1, y + 1) in self.elves
+		)
 
 
 def run(soil_map: SoilMap, max_rounds: Optional[int] = None) -> int:
