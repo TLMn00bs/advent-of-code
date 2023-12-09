@@ -115,6 +115,14 @@ def read_file(file: str) -> Map:
 
 	return map
 
+def compute_valley_states(map: Map) -> List[OpenPositions]:
+	valley_states: List[OpenPositions] = [map.open_positions()]
+	for _ in range(map.period - 1):
+		map.next_minute()
+		valley_states.append(map.open_positions())
+
+	return valley_states
+
 def get_move_options(current_position: Coordinate, next_open_positions: OpenPositions) -> Iterable[Coordinate]:
 	# Wait option
 	if current_position in next_open_positions: yield current_position
@@ -136,10 +144,7 @@ def get_move_options(current_position: Coordinate, next_open_positions: OpenPosi
 
 def p1(args):
 	map = read_file(args.file)
-	valley_states: List[OpenPositions] = [map.open_positions()]
-	for _ in range(map.period - 1):
-		map.next_minute()
-		valley_states.append(map.open_positions())
+	valley_states = compute_valley_states(map)
 
 	options = {map.start_position}
 	for i in count(1):
