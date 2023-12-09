@@ -36,6 +36,8 @@ class Blizzard:
 	x        : int
 	y        : int
 	direction: Direction
+	dx       : int = field(init=False, default=Factory(lambda self: self.direction.dx, takes_self=True))
+	dy       : int = field(init=False, default=Factory(lambda self: self.direction.dy, takes_self=True))
 
 	@property
 	def position(self) -> Coordinate: return self.x, self.y
@@ -78,9 +80,8 @@ class Map:
 
 	def next_minute(self) -> None:
 		for blizzard in self.blizzards:
-			dx, dy = blizzard.direction.dx, blizzard.direction.dy
-			blizzard.x += dx
-			blizzard.y += dy
+			blizzard.x += blizzard.dx
+			blizzard.y += blizzard.dy
 
 			if blizzard.x == 0            : blizzard.x = self.border_x - 1
 			if blizzard.y == 0            : blizzard.y = self.border_y - 1
