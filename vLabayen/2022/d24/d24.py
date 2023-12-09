@@ -111,11 +111,11 @@ def read_file(file: str) -> Map:
 def p1(args):
 	map = read_file(args.file)
 
-	map.print('Initial state')
-	for _ in range(map.period):
+	valley_states: List[Set[Coordinate]] = [map.blizzard_positions()]
+	for _ in range(map.period - 1):
 		map.next_minute()
+		valley_states.append(map.blizzard_positions())
 
-	map.print(f'State after {map.period} minutes')
 
 
 
