@@ -43,45 +43,47 @@ class SoilMap:
 	should_move_east : Dict[Coordinate, bool] = field(init=False, factory=dict)
 
 	def __attrs_post_init__(self):
-		self.inner_update()
+		for x, y in self.elves: self.inner_update(x, y)
 
 	def update(self, remove: Set[Coordinate], add: Set[Coordinate]):
 		self.elves.difference_update(remove)
 		self.elves.update(add)
-		self.inner_update()
+		for x, y in self.elves: self.inner_update(x, y)
 
-	def inner_update(self):
-		for (x, y) in self.elves:
-			self.has_neighbours[(x, y)] = any((
-				(x - 1, y - 1) in self.elves,
-				(x    , y - 1) in self.elves,
-				(x + 1, y - 1) in self.elves,
-				(x - 1, y    ) in self.elves,
-				(x + 1, y    ) in self.elves,
-				(x - 1, y + 1) in self.elves,
-				(x    , y + 1) in self.elves,
-				(x + 1, y + 1) in self.elves,
-			))
-			self.should_move_north[(x, y)] = not any((
-				(x - 1, y - 1) in self.elves,
-				(x    , y - 1) in self.elves,
-				(x + 1, y - 1) in self.elves,
-			))
-			self.should_move_south[(x, y)] = not any((
-				(x - 1, y + 1) in self.elves,
-				(x    , y + 1) in self.elves,
-				(x + 1, y + 1) in self.elves,
-			))
-			self.should_move_west[(x, y)] = not any((
-				(x - 1, y - 1) in self.elves,
-				(x - 1, y    ) in self.elves,
-				(x - 1, y + 1) in self.elves,
-			))
-			self.should_move_east[(x, y)] = not any((
-				(x + 1, y - 1) in self.elves,
-				(x + 1, y    ) in self.elves,
-				(x + 1, y + 1) in self.elves,
-			))
+	def inner_update(self, x: int, y: int):
+		has_neighbours = any((
+			(x - 1, y - 1) in self.elves,
+			(x    , y - 1) in self.elves,
+			(x + 1, y - 1) in self.elves,
+			(x - 1, y    ) in self.elves,
+			(x + 1, y    ) in self.elves,
+			(x - 1, y + 1) in self.elves,
+			(x    , y + 1) in self.elves,
+			(x + 1, y + 1) in self.elves,
+		))
+		self.has_neighbours[(x, y)] = has_neighbours
+		if not has_neighbours: return
+
+		self.should_move_north[(x, y)] = not any((
+			(x - 1, y - 1) in self.elves,
+			(x    , y - 1) in self.elves,
+			(x + 1, y - 1) in self.elves,
+		))
+		self.should_move_south[(x, y)] = not any((
+			(x - 1, y + 1) in self.elves,
+			(x    , y + 1) in self.elves,
+			(x + 1, y + 1) in self.elves,
+		))
+		self.should_move_west[(x, y)] = not any((
+			(x - 1, y - 1) in self.elves,
+			(x - 1, y    ) in self.elves,
+			(x - 1, y + 1) in self.elves,
+		))
+		self.should_move_east[(x, y)] = not any((
+			(x + 1, y - 1) in self.elves,
+			(x + 1, y    ) in self.elves,
+			(x + 1, y + 1) in self.elves,
+		))
 
 
 def run(soil_map: SoilMap, max_rounds: Optional[int] = None) -> int:
