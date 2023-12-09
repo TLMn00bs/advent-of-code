@@ -5,13 +5,16 @@ from enum import Enum
 from attrs import define, field, Factory
 from math import gcd
 from functools import reduce
+from itertools import count
 from collections import defaultdict
+import math
 
 def lcm(numbers: Iterable[int]) -> int:
 	return reduce(lambda a, b: a * b // gcd(a, b), numbers)
 
 
-Coordinate = Tuple[int, int]
+Coordinate    = Tuple[int, int]
+OpenPositions = Set[Coordinate]
 
 class Direction(Enum):
 	LEFT  = '<'
@@ -75,8 +78,12 @@ class Map:
 			print(''.join(repr_map.get((x, y), '.') for x in range(self.border_x + 1)))
 		print()
 
-	def blizzard_positions(self) -> Set[Coordinate]:
-		return set(blizzard.position for blizzard in self.blizzards)
+	def open_positions(self) -> OpenPositions:
+		blizzards = set(blizzard.position for blizzard in self.blizzards)
+		return set.union(
+			set([self.start_position, self.end_position]),
+			set((x, y) for x in range(1, self.border_x) for y in range(1, self.border_y) if (x, y) not in blizzards)
+		)
 
 	def next_minute(self) -> None:
 		for blizzard in self.blizzards:
@@ -108,15 +115,46 @@ def read_file(file: str) -> Map:
 
 	return map
 
+def get_move_options(current_position: Coordinate, next_open_positions: OpenPositions) -> Iterable[Coordinate]:
+	# Wait option
+	if current_position in next_open_positions: yield current_position
+
+	# Move right, bottom, left, up
+	x, y = current_position
+	right, bottom, left, up = (
+		(x + 1, y    ),
+		(x    , y + 1),
+		(x - 1, y    ),
+		(x    , y - 1),
+	)
+
+	if right  in next_open_positions: yield right
+	if bottom in next_open_positions: yield bottom
+	if left   in next_open_positions: yield left
+	if up     in next_open_positions: yield up
+
+
 def p1(args):
 	map = read_file(args.file)
-
-	valley_states: List[Set[Coordinate]] = [map.blizzard_positions()]
+	valley_states: List[OpenPositions] = [map.open_positions()]
 	for _ in range(map.period - 1):
 		map.next_minute()
-		valley_states.append(map.blizzard_positions())
+		valley_states.append(map.open_positions())
 
+	options = {map.start_position}
+	for i in count(1):
+		next_options = set()
+		next_open_positions = valley_states[i % map.period]
 
+		while options:
+			current_position = options.pop()
+			if current_position == map.end_position:
+				print(i - 1)
+				return
+
+			next_options.update(get_move_options(current_position, next_open_positions))
+		
+		options = next_options
 
 
 def p2(args):
