@@ -25,12 +25,24 @@ def predict_next(serie: List[int]) -> int:
 
 	return next_number
 
+def predict_prev(serie: List[int]) -> int:
+	sign: int = -1
+	prev_number: int = serie[0]
+	while any(n != 0 for n in serie):
+		serie = list(reduce(serie))
+		prev_number += sign * serie[0]
+		sign *= -1
+
+	return prev_number
+
 def p1(args):
 	series = read_file(args.file)
 	print(sum(predict_next(serie) for serie in series))
 
 def p2(args):
-	_ = read_file(args.file)
+	series = read_file(args.file)
+	print(sum(predict_prev(serie) for serie in series))
+
 
 if __name__ == '__main__':
 	import argparse
