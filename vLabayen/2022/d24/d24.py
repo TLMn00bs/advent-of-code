@@ -163,7 +163,34 @@ def p1(args):
 
 
 def p2(args):
-	_ = read_file(args.file)
+	map = read_file(args.file)
+	valley_states = compute_valley_states(map)
+
+	options = {map.start_position}
+	targets = [map.end_position, map.start_position, map.end_position]
+	current_target = targets.pop(0)
+
+	for i in count(1):
+		next_options = set()
+		next_open_positions = valley_states[i % map.period]
+
+		while options:
+			current_position = options.pop()
+			if current_position == current_target:
+				if len(targets) == 0:
+					print(i - 1)
+					return
+
+				# Update our target & clear all ongoing paths, since once a target is reached we could always
+				# wait here as time as required to match any posible future arrival
+				current_target = targets.pop(0)
+				options = set()
+				next_options = set()
+
+			next_options.update(get_move_options(current_position, next_open_positions))
+
+		options = next_options
+
 
 if __name__ == '__main__':
 	import argparse
