@@ -1,5 +1,6 @@
 #!/bin/python3
 import logging
+from attrs import define, field
 from typing import Tuple, Iterable, Set, List, Callable, Dict
 from enum import Enum
 from collections import defaultdict
@@ -71,7 +72,7 @@ def p1(args):
 		(should_propose_move_west , Direction.W),
 		(should_propose_move_east , Direction.E),
 	]
-	
+
 	# print_elves(elves, 'Initial State')
 
 	for round in range(10):
@@ -98,8 +99,124 @@ def p1(args):
 
 	print(get_containing_rectangle_area(elves) - len(elves))
 
+@define
+class SoilMap:
+	elves: Set[Coordinate]
+
+	has_neighbours   : Dict[Coordinate, bool] = field(init=False, factory=dict)
+	should_move_north: Dict[Coordinate, bool] = field(init=False, factory=dict)
+	should_move_south: Dict[Coordinate, bool] = field(init=False, factory=dict)
+	should_move_west : Dict[Coordinate, bool] = field(init=False, factory=dict)
+	should_move_east : Dict[Coordinate, bool] = field(init=False, factory=dict)
+
+	def __attrs_post_init__(self):
+		for (x, y) in self.elves:
+			self.has_neighbours[(x, y)] = any((
+				(x - 1, y - 1) in self.elves,
+				(x    , y - 1) in self.elves,
+				(x + 1, y - 1) in self.elves,
+				(x - 1, y    ) in self.elves,
+				(x + 1, y    ) in self.elves,
+				(x - 1, y + 1) in self.elves,
+				(x    , y + 1) in self.elves,
+				(x + 1, y + 1) in self.elves,
+			))
+			self.should_move_north[(x, y)] = not any((
+				(x - 1, y - 1) in self.elves,
+				(x    , y - 1) in self.elves,
+				(x + 1, y - 1) in self.elves,
+			))
+			self.should_move_south[(x, y)] = not any((
+				(x - 1, y + 1) in self.elves,
+				(x    , y + 1) in self.elves,
+				(x + 1, y + 1) in self.elves,
+			))
+			self.should_move_west[(x, y)] = not any((
+				(x - 1, y - 1) in self.elves,
+				(x - 1, y    ) in self.elves,
+				(x - 1, y + 1) in self.elves,
+			))
+			self.should_move_east[(x, y)] = not any((
+				(x + 1, y - 1) in self.elves,
+				(x + 1, y    ) in self.elves,
+				(x + 1, y + 1) in self.elves,
+			))
+
+	def update(self, remove: Set[Coordinate], add: Set[Coordinate]):
+		self.elves.difference_update(remove)
+		self.elves.update(add)
+
+		for (x, y) in self.elves:
+			self.has_neighbours[(x, y)] = any((
+				(x - 1, y - 1) in self.elves,
+				(x    , y - 1) in self.elves,
+				(x + 1, y - 1) in self.elves,
+				(x - 1, y    ) in self.elves,
+				(x + 1, y    ) in self.elves,
+				(x - 1, y + 1) in self.elves,
+				(x    , y + 1) in self.elves,
+				(x + 1, y + 1) in self.elves,
+			))
+			self.should_move_north[(x, y)] = not any((
+				(x - 1, y - 1) in self.elves,
+				(x    , y - 1) in self.elves,
+				(x + 1, y - 1) in self.elves,
+			))
+			self.should_move_south[(x, y)] = not any((
+				(x - 1, y + 1) in self.elves,
+				(x    , y + 1) in self.elves,
+				(x + 1, y + 1) in self.elves,
+			))
+			self.should_move_west[(x, y)] = not any((
+				(x - 1, y - 1) in self.elves,
+				(x - 1, y    ) in self.elves,
+				(x - 1, y + 1) in self.elves,
+			))
+			self.should_move_east[(x, y)] = not any((
+				(x + 1, y - 1) in self.elves,
+				(x + 1, y    ) in self.elves,
+				(x + 1, y + 1) in self.elves,
+			))
+
 def p2(args):
-	_ = read_file(args.file)
+	soil_map = SoilMap(set(read_file(args.file)))
+	proposing_order: List[Tuple[Dict[Coordinate, bool], int, int]] = [
+		(soil_map.should_move_north,  0, -1),
+		(soil_map.should_move_south,  0, +1),
+		(soil_map.should_move_west , -1,  0),
+		(soil_map.should_move_east , +1,  0),
+	]
+
+	# print_elves(soil_map.elves, 'Initial State')
+
+	for round in count():
+		if round % 10 == 0: print(round)
+
+		round_proposing_order = [proposing_order[(round + i) % 4] for i in range(4)]
+		elves_proposed_destinations: Dict[Coordinate, Coordinate] = {}
+		requested_destinations = defaultdict(lambda: 0)
+
+		for (x, y) in soil_map.elves:
+			if not soil_map.has_neighbours[(x, y)]: continue
+
+			for should_move, dx, dy in round_proposing_order:
+				if should_move[(x, y)]:
+					new_location = (x + dx, y + dy)
+					requested_destinations[new_location] += 1
+					elves_proposed_destinations[(x, y)] = new_location
+					break
+			else: continue
+
+		new_destinations = set(destination for destination, num_times_requested in requested_destinations.items() if num_times_requested == 1)
+		moving_elves = set(elve for elve, destination in elves_proposed_destinations.items() if destination in new_destinations)
+
+		if len(new_destinations) == 0:
+			print(round + 1)
+			return
+
+		soil_map.update(moving_elves, new_destinations)
+		# print_elves(soil_map.elves, f'End of Round {round + 1}')
+
 
 if __name__ == '__main__':
 	import argparse
