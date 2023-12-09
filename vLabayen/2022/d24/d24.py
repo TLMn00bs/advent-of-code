@@ -1,6 +1,6 @@
 #!/bin/python3
 import logging
-from typing import Tuple, Iterable, List, Set, Dict
+from typing import Tuple, Iterable, List, Set, Dict, Optional
 from enum import Enum
 from attrs import define, field, Factory
 from math import gcd
@@ -49,7 +49,7 @@ class Map:
 	border_y      : int
 	period        : int = field(init=False, default=Factory(lambda self: lcm((self.border_x - 1, self.border_y - 1)), takes_self=True))		# type: ignore
 
-	def print(self):
+	def print(self, title: Optional[str] = None):
 		blizzards: Dict[Coordinate, List[Blizzard]] = defaultdict(lambda: [])
 		for blizzard in self.blizzards: blizzards[blizzard.position].append(blizzard)
 
@@ -68,9 +68,10 @@ class Map:
 			**{p: str(blz[0].direction.value if len(blz) == 1 else len(blz)) for p, blz in blizzards.items()}
 		}
 
+		if title is not None: print(f'== {title} ==')
 		for y in range(self.border_y + 1):
 			print(''.join(repr_map.get((x, y), '.') for x in range(self.border_x + 1)))
-
+		print()
 
 	def blizzard_positions(self) -> Set[Coordinate]:
 		return set(blizzard.position for blizzard in self.blizzards)
@@ -108,10 +109,14 @@ def read_file(file: str) -> Map:
 
 def p1(args):
 	map = read_file(args.file)
-	map.print()
-	map.next_minute()
-	print('----')
-	map.print()
+
+	map.print('Initial state')
+	for _ in range(map.period):
+		map.next_minute()
+
+	map.print(f'State after {map.period} minutes')
+
+
 
 def p2(args):
 	_ = read_file(args.file)
