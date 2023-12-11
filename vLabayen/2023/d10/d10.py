@@ -3,6 +3,9 @@ from typing import Dict, Tuple, Set, Deque, Iterable, List, Optional, Callable
 from attrs import define, field
 from collections import deque
 from itertools import count
+from enum import Enum, auto
+from collections import Counter
+
 
 Coordinate = Tuple[int, int]
 PipeConnections = List[Coordinate]
@@ -115,6 +118,20 @@ def resolve_start(x: int, y: int, path: Set[Coordinate]) -> Pipe:
 	raise
 
 
+class Rotation(Enum):
+	Clockwise        = auto()
+	CounterClockwise = auto()
+
+_corner_rotation = {
+	'L': lambda prev, next: Rotation.Clockwise if prev.y > next.y else Rotation.CounterClockwise,
+	'F': lambda prev, next: Rotation.Clockwise if prev.y > next.y else Rotation.CounterClockwise,
+	'J': lambda prev, next: Rotation.Clockwise if prev.y < next.y else Rotation.CounterClockwise,
+	'7': lambda prev, next: Rotation.Clockwise if prev.y < next.y else Rotation.CounterClockwise,
+}
+def rotation_direction(prev: Pipe, corner: Pipe, next: Pipe) -> Rotation:
+	return _corner_rotation[corner.shape](prev, next)
+
+
 def p2(args):
 	pipes = read_file(args.file)
 	start = [pipe for pipe in pipes.values() if pipe.shape == 'S'][0]
@@ -123,6 +140,10 @@ def p2(args):
 	loop[loop.index(start)] = resolve_start(start.x, start.y, set((pipe.x, pipe.y) for pipe in loop))
 	for p in loop: print(p)
 
+	corners = ((loop[(i - 1) % len(loop)], p, loop[(i + 1) % len(loop)]) for i, p in enumerate(loop))
+	rotations = (rotation_direction(prev, corner, next) for prev, corner, next in corners if corner.shape in {'L', 'F', 'J', '7'})
+	c = Counter(rotations)
+	print(c)
 
 if __name__ == '__main__':
 	import argparse
