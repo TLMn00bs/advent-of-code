@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Tuple, Set, Deque, Iterable, List
+from typing import Dict, Tuple, Set, Deque, Iterable, List, Optional, Callable
 from attrs import define, field
 from collections import deque
 from itertools import count
@@ -17,7 +17,7 @@ pipes_shapes: Dict[str, PipeConnections] = {
 	'S': [( 0, -1), ( 0, +1), (-1, 0), (+1, 0)]
 }
 
-@define(hash=True, eq=False)
+@define(hash=True, eq=True)
 class Pipe:
 	shape: str
 	x: int
@@ -80,9 +80,48 @@ def p1(args):
 				visited_nodes.add(neighbour)
 
 
+def next_pipe(pipe: Pipe, is_prev: Callable[[Pipe], bool], pipes: Dict[Coordinate, Pipe]) -> Optional[Pipe]:
+	connected_pipes = list(get_connected_pipes(pipe, pipes))
+	if len(connected_pipes) != 2: return None
+	next_pipe, = [pipe for pipe in connected_pipes if not is_prev(pipe)]
+	return next_pipe
+
+def get_loop(start: Pipe, pipes: Dict[Coordinate, Pipe]) -> Set[Pipe]:
+	paths: List[Pipe] = list(get_connected_pipes(start, pipes))
+
+	while len(paths) > 0:
+		first_pipe = paths.pop()
+		current_path: Set[Pipe] = set([first_pipe])
+
+		current_pipe = next_pipe(first_pipe, lambda pipe: pipe == start, pipes)
+		if current_pipe is None: continue
+		while True:
+			current_path.add(current_pipe)
+			if current_pipe == start: return current_path
+
+			current_pipe = next_pipe(current_pipe, lambda pipe: pipe in current_path, pipes)
+			if current_pipe is None: break
+
+	raise
+
+def resolve_start(x: int, y: int, path: Set[Pipe]) -> Pipe:
+	path_coordinates = set((pipe.x, pipe.y) for pipe in path)
+	for shape in {'L', 'J', '7', 'F'}:
+		connected_neighbours: List[Coordinate] = [(x + dx, y + dy) for dx, dy in pipes_shapes[shape]]
+		if all(neighbour in path_coordinates for neighbour in connected_neighbours):
+			return Pipe(shape, x, y)
+	
+	raise
 
 def p2(args):
-	_ = read_file(args.file)
+	pipes = read_file(args.file)
+	start = [pipe for pipe in pipes.values() if pipe.shape == 'S'][0]
+
+	loop = get_loop(start, pipes)
+	resolved_start = resolve_start(start.x, start.y, loop)
+	loop.remove(start)
+	loop.add(resolved_start)
+	for p in loop: print(p)
 
 if __name__ == '__main__':
 	import argparse
