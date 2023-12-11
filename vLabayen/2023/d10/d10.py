@@ -86,42 +86,43 @@ def next_pipe(pipe: Pipe, is_prev: Callable[[Pipe], bool], pipes: Dict[Coordinat
 	next_pipe, = [pipe for pipe in connected_pipes if not is_prev(pipe)]
 	return next_pipe
 
-def get_loop(start: Pipe, pipes: Dict[Coordinate, Pipe]) -> Set[Pipe]:
+def get_loop(start: Pipe, pipes: Dict[Coordinate, Pipe]) -> List[Pipe]:
 	paths: List[Pipe] = list(get_connected_pipes(start, pipes))
 
 	while len(paths) > 0:
 		first_pipe = paths.pop()
 		current_path: Set[Pipe] = set([first_pipe])
+		ordered_path: List[Pipe] = [first_pipe]
 
 		current_pipe = next_pipe(first_pipe, lambda pipe: pipe == start, pipes)
 		if current_pipe is None: continue
 		while True:
 			current_path.add(current_pipe)
-			if current_pipe == start: return current_path
+			ordered_path.append(current_pipe)
+			if current_pipe == start: return ordered_path
 
 			current_pipe = next_pipe(current_pipe, lambda pipe: pipe in current_path, pipes)
 			if current_pipe is None: break
 
 	raise
 
-def resolve_start(x: int, y: int, path: Set[Pipe]) -> Pipe:
-	path_coordinates = set((pipe.x, pipe.y) for pipe in path)
+def resolve_start(x: int, y: int, path: Set[Coordinate]) -> Pipe:
 	for shape in {'L', 'J', '7', 'F'}:
-		connected_neighbours: List[Coordinate] = [(x + dx, y + dy) for dx, dy in pipes_shapes[shape]]
-		if all(neighbour in path_coordinates for neighbour in connected_neighbours):
+		connected_neighbours: Iterable[Coordinate] = ((x + dx, y + dy) for dx, dy in pipes_shapes[shape])
+		if all(neighbour in path for neighbour in connected_neighbours):
 			return Pipe(shape, x, y)
 	
 	raise
+
 
 def p2(args):
 	pipes = read_file(args.file)
 	start = [pipe for pipe in pipes.values() if pipe.shape == 'S'][0]
 
 	loop = get_loop(start, pipes)
-	resolved_start = resolve_start(start.x, start.y, loop)
-	loop.remove(start)
-	loop.add(resolved_start)
+	loop[loop.index(start)] = resolve_start(start.x, start.y, set((pipe.x, pipe.y) for pipe in loop))
 	for p in loop: print(p)
+
 
 if __name__ == '__main__':
 	import argparse
