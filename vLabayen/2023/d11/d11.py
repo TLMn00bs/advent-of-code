@@ -20,10 +20,10 @@ def read_file(file: str) -> Iterable[Galaxy]:
 			for x, c in enumerate(line):
 				if c == '#': yield Galaxy(x, y)
 
-def sortest_distance(g1: Galaxy, g2: Galaxy, galaxies_in_x: Set[int], galaxies_in_y: Set[int]) -> int:
+def sortest_distance(g1: Galaxy, g2: Galaxy, galaxies_in_x: Set[int], galaxies_in_y: Set[int], expand_ratio: int = 2) -> int:
 	pre_expanded_distane = manhattan_distance(g1, g2)
-	expanded_x = sum(1 for x in range(g1.x, g2.x, 1 if g2.x > g1.x else -1) if x not in galaxies_in_x)
-	expanded_y = sum(1 for y in range(g1.y, g2.y, 1 if g2.y > g1.y else -1) if y not in galaxies_in_y)
+	expanded_x = sum((expand_ratio - 1) for x in range(g1.x, g2.x, 1 if g2.x > g1.x else -1) if x not in galaxies_in_x)
+	expanded_y = sum((expand_ratio - 1) for y in range(g1.y, g2.y, 1 if g2.y > g1.y else -1) if y not in galaxies_in_y)
 	return pre_expanded_distane + expanded_x + expanded_y
 
 def p1(args):
@@ -34,7 +34,11 @@ def p1(args):
 	print(sum(sortest_distance(g1, g2, galaxies_in_x, galaxies_in_y) for g1, g2 in combinations(galaxies, 2)))
 
 def p2(args):
-	_ = read_file(args.file)
+	galaxies = set(read_file(args.file))
+
+	galaxies_in_x = set(g.x for g in galaxies)
+	galaxies_in_y = set(g.y for g in galaxies)
+	print(sum(sortest_distance(g1, g2, galaxies_in_x, galaxies_in_y, expand_ratio=1_000_000) for g1, g2 in combinations(galaxies, 2)))
 
 if __name__ == '__main__':
 	import argparse
