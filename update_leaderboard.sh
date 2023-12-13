@@ -29,7 +29,7 @@ awk 'BEGIN{
         langs["i97orbegozo"]="*"
         langs["rubenmate"]  ="*"
         langs["Adrian-Uri"] ="*"
-        langs["clarriu97"]  ="*"
+        langs["clarriu97"]  ="Python"
     }
     {print" | [@"$1"](https://github.com/"$1")| ["langs[$1]"](https://github.com/TLMn00bs/advent-of-code/tree/master/"$1") | "$2" |"}' >> README.md
 
