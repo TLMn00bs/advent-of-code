@@ -2,6 +2,15 @@ import logging
 from typing import List, Iterable, Optional
 from attrs import define
 
+
+def is_reflective(row_or_column: str, index: int) -> bool:
+	side1, side2 = row_or_column[:index], row_or_column[index:]
+	min_size = min(len(side1), len(side2))
+	side1 = side1[-min_size:]
+	side2 = side2[:min_size]
+
+	return side1[::-1] == side2
+
 @define
 class Pattern:
 	rows: List[str]
@@ -32,13 +41,6 @@ def read_file(file: str) -> Iterable[Pattern]:
 
 		yield Pattern(rows)
 
-def is_reflective(row_or_column: str, index: int) -> bool:
-	side1, side2 = row_or_column[:index], row_or_column[index:]
-	min_size = min(len(side1), len(side2))
-	side1 = side1[-min_size:]
-	side2 = side2[:min_size]
-
-	return side1[::-1] == side2
 
 def find_vertical_reflection(pattern: Pattern) -> Optional[int]:
 	num_columns_to_the_left = set(range(1, pattern.width))
