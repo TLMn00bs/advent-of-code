@@ -59,11 +59,12 @@ def read_file(file: str) -> Iterable[SpringRow]:
 def gen_options(groups: List[Group], sizes: List[int]):
 	if len(sizes) == 0:
 		forced_groups = [group for group in groups if group.must_exists]
-		if len(forced_groups) == 0: yield [None]
-		return
+		if len(forced_groups) == 0: return 1
+		return 0
 
-	if len(groups) == 0: return
+	if len(groups) == 0: return 0
 
+	num_options = 0
 	group_offset = 0
 	spring_offset = 0
 	size = sizes[0]
@@ -71,8 +72,8 @@ def gen_options(groups: List[Group], sizes: List[int]):
 		group = groups[group_offset]
 		springs = group.springs[spring_offset:]
 		if len(springs) < size:
-			if len(groups[group_offset + 1:]) == 0: return
-			if group.must_exists: return
+			if len(groups[group_offset + 1:]) == 0: return num_options
+			if group.must_exists: return num_options
 			group_offset += 1
 			spring_offset = 0
 			continue
@@ -81,10 +82,9 @@ def gen_options(groups: List[Group], sizes: List[int]):
 			remaining_springs = springs[size + 1:]
 			remaining_groups = [Group(remaining_springs), *groups[group_offset + 1:]] if len(remaining_springs) > 0 else groups[group_offset + 1:]
 			remaining_sizes = sizes[1:]
-			for opt in gen_options(remaining_groups, remaining_sizes):
-				yield [(group, (size, spring_offset)), *opt]
+			num_options += gen_options(remaining_groups, remaining_sizes)
 
-		if springs[0] == Spring.DAMAGED: return
+		if springs[0] == Spring.DAMAGED: return num_options
 		spring_offset += 1
 
 def p1(args):
