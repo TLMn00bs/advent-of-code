@@ -58,7 +58,7 @@ def find_horizontal_reflection(pattern: Pattern) -> Optional[int]:
 
 
 def p1(args):
-	patterns = list(read_file(args.file))
+	patterns = read_file(args.file)
 	print(sum(find_vertical_reflection(pattern) or 100 * find_horizontal_reflection(pattern) for pattern in patterns))		# type: ignore
 
 
