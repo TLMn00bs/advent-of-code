@@ -32,16 +32,19 @@ def read_file(file: str) -> Iterable[Pattern]:
 
 		yield Pattern(rows)
 
+def is_reflective(row_or_column: str, index: int) -> bool:
+	side1, side2 = row_or_column[:index], row_or_column[index:]
+	min_size = min(len(side1), len(side2))
+	side1 = side1[-min_size:]
+	side2 = side2[:min_size]
+
+	return side1[::-1] == side2
+
 def find_vertical_reflection(pattern: Pattern) -> Optional[int]:
 	num_columns_to_the_left = set(range(1, pattern.width))
 	for row in pattern.rows:
 		for column in num_columns_to_the_left.copy():
-			left, right = row[:column], row[column:]
-			min_size = min(len(left), len(right))
-			left  = left[-min_size:]
-			right = right[:min_size]
-
-			if not left[::-1] == right: num_columns_to_the_left.remove(column)
+			if not is_reflective(row, column): num_columns_to_the_left.remove(column)
 
 	if len(num_columns_to_the_left) == 1: return num_columns_to_the_left.pop()
 
@@ -49,12 +52,7 @@ def find_horizontal_reflection(pattern: Pattern) -> Optional[int]:
 	num_rows_above = set(range(1, pattern.height))
 	for column in pattern.columns:
 		for row in num_rows_above.copy():
-			above, below = column[:row], column[row:]
-			min_size = min(len(above), len(below))
-			above = above[-min_size:]
-			below = below[:min_size]
-
-			if not above[::-1] == below: num_rows_above.remove(row)
+			if not is_reflective(column, row): num_rows_above.remove(row)
 	
 	if len(num_rows_above) == 1: return num_rows_above.pop()
 
