@@ -46,10 +46,12 @@ def get_groups(springs: List[Spring]) -> List[Group]:
 
 	return posible_damaged_groups
 
-def read_file(file: str) -> Iterable[SpringRow]:
+def read_file(file: str, unfold_factor: int = 1) -> Iterable[SpringRow]:
 	with open(file, 'r') as f:
 		for line in (l.strip() for l in f):
 			springs, groups = line.split()
+			springs = '?'.join(springs for _ in range(unfold_factor))
+			groups  = ','.join(groups  for _ in range(unfold_factor))
 			yield SpringRow(
 				groups              = get_groups([Spring(c) for c in springs]),
 				damaged_group_sizes = [int(n) for n in groups.split(',')]
