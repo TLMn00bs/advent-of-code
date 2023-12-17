@@ -14,15 +14,12 @@ def is_reflective(row_or_column: str, index: int) -> bool:
 @define
 class Pattern:
 	rows: List[str]
-	row_reflections: List[Set[int]] = field(factory=list)
-	col_reflections: List[Set[int]] = field(factory=list)
+	row_reflections: List[Set[int]] = field(init=False)
+	col_reflections: List[Set[int]] = field(init=False)
 
 	def __attrs_post_init__(self):
-		for row in self.rows:
-			self.row_reflections.append(set(idx for idx in range(1, self.width) if is_reflective(row, idx)))
-
-		for col in self.columns:
-			self.col_reflections.append(set(idx for idx in range(1, self.height) if is_reflective(col, idx)))
+		self.row_reflections = [set(idx for idx in range(1, self.width)  if is_reflective(row, idx)) for row in self.rows]
+		self.col_reflections = [set(idx for idx in range(1, self.height) if is_reflective(col, idx)) for col in self.cols]
 
 	@property
 	def width(self) -> int: return len(self.rows[0])
@@ -30,7 +27,7 @@ class Pattern:
 	def height(self) -> int: return len(self.rows)
 
 	@property
-	def columns(self) -> Iterable[str]:
+	def cols(self) -> Iterable[str]:
 		for idx in range(self.width):
 			yield ''.join(row[idx] for row in self.rows)
 
@@ -58,6 +55,7 @@ def find_vertical_reflection(pattern: Pattern) -> Optional[int]:
 def find_horizontal_reflection(pattern: Pattern) -> Optional[int]:
 	reflection = set.intersection(*pattern.col_reflections)
 	if len(reflection) > 0: return reflection.pop()
+
 
 def p1(args):
 	patterns = list(read_file(args.file))
