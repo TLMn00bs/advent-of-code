@@ -1,6 +1,7 @@
 import logging
 from typing import List, Iterable, Optional, Set
 from attrs import define, field
+from collections import Counter
 
 
 def is_reflective(row_or_column: str, index: int) -> bool:
@@ -56,6 +57,13 @@ def find_horizontal_reflection(pattern: Pattern) -> Optional[int]:
 	reflection = set.intersection(*pattern.col_reflections)
 	if len(reflection) > 0: return reflection.pop()
 
+def find_vertical_smudged_reflection(pattern: Pattern) -> Optional[int]:
+	for col, value in Counter(v for reflection in pattern.row_reflections for v in reflection).most_common():
+		if value == pattern.height - 1: return col
+
+def find_horizontal_smudged_reflection(pattern: Pattern) -> Optional[int]:
+	for row, value in Counter(v for reflection in pattern.col_reflections for v in reflection).most_common():
+		if value == pattern.width - 1: return row
 
 def p1(args):
 	patterns = read_file(args.file)
@@ -63,7 +71,8 @@ def p1(args):
 
 
 def p2(args):
-	_ = read_file(args.file)
+	patterns = read_file(args.file)
+	print(sum(find_vertical_smudged_reflection(pattern) or 100 * find_horizontal_smudged_reflection(pattern) for pattern in patterns))		# type: ignore
 
 if __name__ == '__main__':
 	import argparse
