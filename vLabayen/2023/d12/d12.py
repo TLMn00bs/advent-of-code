@@ -2,6 +2,7 @@ import logging
 from typing import List, Iterable, Tuple
 from enum import Enum
 from attrs import define, field
+from functools import lru_cache
 
 
 class Spring(Enum):
@@ -11,9 +12,9 @@ class Spring(Enum):
 
 	def __repr__(self): return self.name
 
-@define
+@define(hash=True, eq=True)
 class Group:
-	springs: List[Spring]
+	springs: Tuple[Spring, ...]
 	must_exists: bool = field(init=False)
 
 	def __attrs_post_init__(self):
@@ -37,12 +38,12 @@ def get_groups(springs: List[Spring]) -> List[Group]:
 	for spring in springs:
 		if spring == Spring.OPERATIONAL:
 			if len(current_group) != 0:
-				posible_damaged_groups.append(Group(current_group))
+				posible_damaged_groups.append(Group(tuple(current_group)))
 				current_group = []
 			continue
 	
 		current_group.append(spring)
-	if len(current_group) != 0: posible_damaged_groups.append(Group(current_group))
+	if len(current_group) != 0: posible_damaged_groups.append(Group(tuple(current_group)))
 
 	return posible_damaged_groups
 
@@ -58,7 +59,8 @@ def read_file(file: str, unfold_factor: int = 1) -> Iterable[SpringRow]:
 			)
 
 
-def gen_options(groups: List[Group], sizes: List[int]):
+@lru_cache(maxsize=65536)
+def gen_options(groups: Tuple[Group], sizes: Tuple[int, ...]):
 	if len(sizes) == 0:
 		forced_groups = [group for group in groups if group.must_exists]
 		if len(forced_groups) == 0: return 1
@@ -82,7 +84,7 @@ def gen_options(groups: List[Group], sizes: List[int]):
 
 		if len(springs) == size or springs[size] == Spring.UNKNOWN:
 			remaining_springs = springs[size + 1:]
-			remaining_groups = [Group(remaining_springs), *groups[group_offset + 1:]] if len(remaining_springs) > 0 else groups[group_offset + 1:]
+			remaining_groups = tuple([Group(remaining_springs), *groups[group_offset + 1:]]) if len(remaining_springs) > 0 else groups[group_offset + 1:]
 			remaining_sizes = sizes[1:]
 			num_options += gen_options(remaining_groups, remaining_sizes)
 
@@ -91,10 +93,11 @@ def gen_options(groups: List[Group], sizes: List[int]):
 
 def p1(args):
 	rows = read_file(args.file)
-	print(sum(1 for row in rows for opt in gen_options(row.groups, row.damaged_group_sizes)))
+	print(sum(gen_options(tuple(row.groups), tuple(row.damaged_group_sizes)) for row in rows))
 
 def p2(args):
-	_ = read_file(args.file)
+	rows = read_file(args.file, unfold_factor=5)
+	print(sum(gen_options(tuple(row.groups), tuple(row.damaged_group_sizes)) for row in rows))
 
 if __name__ == '__main__':
 	import argparse
