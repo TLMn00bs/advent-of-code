@@ -1,6 +1,6 @@
 import logging
-from typing import List, Iterable, Optional
-from attrs import define
+from typing import List, Iterable, Optional, Set
+from attrs import define, field
 
 
 def is_reflective(row_or_column: str, index: int) -> bool:
@@ -14,6 +14,15 @@ def is_reflective(row_or_column: str, index: int) -> bool:
 @define
 class Pattern:
 	rows: List[str]
+	row_reflections: List[Set[int]] = field(factory=list)
+	col_reflections: List[Set[int]] = field(factory=list)
+
+	def __attrs_post_init__(self):
+		for row in self.rows:
+			self.row_reflections.append(set(idx for idx in range(1, self.width) if is_reflective(row, idx)))
+
+		for col in self.columns:
+			self.col_reflections.append(set(idx for idx in range(1, self.height) if is_reflective(col, idx)))
 
 	@property
 	def width(self) -> int: return len(self.rows[0])
@@ -43,21 +52,12 @@ def read_file(file: str) -> Iterable[Pattern]:
 
 
 def find_vertical_reflection(pattern: Pattern) -> Optional[int]:
-	num_columns_to_the_left = set(range(1, pattern.width))
-	for row in pattern.rows:
-		for column in num_columns_to_the_left.copy():
-			if not is_reflective(row, column): num_columns_to_the_left.remove(column)
-
-	if len(num_columns_to_the_left) == 1: return num_columns_to_the_left.pop()
+	reflection = set.intersection(*pattern.row_reflections)
+	if len(reflection) > 0: return reflection.pop()
 
 def find_horizontal_reflection(pattern: Pattern) -> Optional[int]:
-	num_rows_above = set(range(1, pattern.height))
-	for column in pattern.columns:
-		for row in num_rows_above.copy():
-			if not is_reflective(column, row): num_rows_above.remove(row)
-	
-	if len(num_rows_above) == 1: return num_rows_above.pop()
-
+	reflection = set.intersection(*pattern.col_reflections)
+	if len(reflection) > 0: return reflection.pop()
 
 def p1(args):
 	patterns = list(read_file(args.file))
