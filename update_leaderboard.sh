@@ -23,7 +23,7 @@ awk 'BEGIN{
         langs["lassa97"]    ="*"
         langs["vLabayen"]   ="*"
         langs["anatxiki"]   ="*"
-        langs["jartigag"]   ="*"
+        langs["jartigag"]   ="Bash"
         langs["mariaove"]   ="*"
         langs["jesusarell"] ="*"
         langs["i97orbegozo"]="*"
