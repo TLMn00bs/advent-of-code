@@ -9,7 +9,7 @@ total_distance=0
 similarity_score=0
 for i in "${!sorted_left[@]}"; do
   distance=$((       ${sorted_left[$i]} - ${sorted_right[$i]} ))
-  total_distance=$(( total_distance + ${distance#-}           ))
+  total_distance=$(( total_distance     + ${distance#-}       ))
 
   count=0
   left_value="${sorted_left[$i]}"
