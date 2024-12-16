@@ -23,7 +23,7 @@ awk 'BEGIN{
         langs["lassa97"]    ="*"
         langs["vLabayen"]   ="*"
         langs["anatxiki"]   ="*"
-        langs["jartigag"]   ="Bash"
+        langs["jartigag"]   ="Bash and Python Jupyter Notebook"
         langs["mariaove"]   ="*"
         langs["jesusarell"] ="*"
         langs["i97orbegozo"]="*"
