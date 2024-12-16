@@ -3,7 +3,7 @@ Here you can find some solutions to Advent of Code 2024.
 
  |  ☃️  |  🧰  |  ⭐  |
  | :--: | :--: | :-: |
- | [@jartigag](https://github.com/jartigag)| [Bash](https://github.com/TLMn00bs/advent-of-code/tree/master/jartigag) | 6 |
+ | [@jartigag](https://github.com/jartigag)| [Bash and Python Jupyter Notebook](https://github.com/TLMn00bs/advent-of-code/tree/master/jartigag) | 6 |
  | [@vLabayen](https://github.com/vLabayen)| [*](https://github.com/TLMn00bs/advent-of-code/tree/master/vLabayen) | 0 |
  | [@jesusarell](https://github.com/jesusarell)| [*](https://github.com/TLMn00bs/advent-of-code/tree/master/jesusarell) | 0 |
  | [@mariaove](https://github.com/mariaove)| [*](https://github.com/TLMn00bs/advent-of-code/tree/master/mariaove) | 0 |
