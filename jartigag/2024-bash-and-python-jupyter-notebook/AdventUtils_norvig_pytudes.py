@@ -207,12 +207,16 @@ def mapt(function: Callable, *sequences) -> tuple:
     """`map`, with the result as a tuple."""
     return tuple(map(function, *sequences))
 
+def cat(things: Collection, sep='') -> str:
+    """Concatenate the things."""
+    return sep.join(map(str, things))
+
 # __Itertools Recipes__
 # The Python docs for the itertools module has some
 # [recipes](https://docs.python.org/3/library/itertools.html#itertools-recipes)
 # that I include here (some I have slightly modified):
 
-from itertools import chain
+from itertools import chain, takewhile
 
 flatten = chain.from_iterable # Yield items from each sequence in turn
 
