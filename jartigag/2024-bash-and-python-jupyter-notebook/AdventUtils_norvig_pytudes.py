@@ -13,6 +13,7 @@
 
 import matplotlib.pyplot as plt
 import time
+from statistics import mean, median
 from typing import *
 
 # __Daily Workflow__
@@ -148,7 +149,6 @@ class answer:
 
 def summary(answers):
     """Print a report that summarizes the answers."""
-    from statistics  import mean, median
     for d in sorted(answers):
         print(answers[d])
     times = [answers[d].secs for d in answers]
@@ -158,6 +158,13 @@ def summary(answers):
 # __Additional utility functions__
 # All of the following have been used in solutions to multiple puzzles in the past,
 # so I pulled them all in here:
+
+def prod(numbers) -> float: # Will be math.prod in Python 3.8
+    """The product formed by multiplying `numbers` together."""
+    result = 1
+    for x in numbers:
+        result *= x
+    return result
 
 def T(matrix: Sequence[Sequence]) -> List[Tuple]:
     """The transpose of a matrix: T([(1,2,3), (4,5,6)]) == [(1,4), (2,5), (3,6)]"""
@@ -179,6 +186,8 @@ def the(sequence) -> object:
     for i, item in enumerate(sequence, 1):
         if i > 1: raise ValueError(f'Expected exactly one item in the sequence.')
     return item
+
+def sign(x) -> int: "0, +1, or -1"; return (0 if x == 0 else +1 if x > 0 else -1)
 
 def union(sets) -> set: "Union of several sets"; return set().union(*sets)
 
@@ -257,7 +266,6 @@ def distance(p: Point, q: Point) -> float:
 def slide(points: Set[Point], delta: Vector) -> Set[Point]:
     """Slide all the points in the set of points by the amount delta."""
     return {add(p, delta) for p in points}
-
 def make_turn(facing:Vector, turn:str) -> Vector:
     """Turn 90 degrees left or right. `turn` can be 'L' or 'Left' or 'R' or 'Right' or lowercase."""
     (x, y) = facing
@@ -270,6 +278,10 @@ def add2(p: Point, q: Point) -> Point:
 def sub2(p: Point, q: Point) -> Point:
     """Specialized version of point subtraction for 2D Points only. Faster."""
     return (p[0] - q[0], p[1] - q[1])
+
+def taxi_distance(p: Point, q: Point) -> int:
+    """Manhattan (L1) distance between two 2D Points."""
+    return abs(p[0] - q[0]) + abs(p[1] - q[1])
 
 # __Points on a Grid__
 # Many puzzles seem to involve a two-dimensional rectangular grid with integer coordinates.
