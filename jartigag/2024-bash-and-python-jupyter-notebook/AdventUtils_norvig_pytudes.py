@@ -267,6 +267,10 @@ def add2(p: Point, q: Point) -> Point:
     """Specialized version of point addition for 2D Points only. Faster."""
     return (p[0] + q[0], p[1] + q[1])
 
+def sub2(p: Point, q: Point) -> Point:
+    """Specialized version of point subtraction for 2D Points only. Faster."""
+    return (p[0] - q[0], p[1] - q[1])
+
 # __Points on a Grid__
 # Many puzzles seem to involve a two-dimensional rectangular grid with integer coordinates.
 # A `Grid` is a rectangular array of (integer, integer) points, where each point holds some contents.
